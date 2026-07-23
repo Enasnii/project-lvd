@@ -24,11 +24,13 @@ Stel deze variabelen in in Vercel > Project > Settings > Environment Variables:
 - NEXT_PUBLIC_ADMIN_USERNAME
 - NEXT_PUBLIC_ADMIN_PASSWORD
 - BLOB_READ_WRITE_TOKEN
+- POSTGRES_URL
 
 Voorbeeldwaarden:
 - NEXT_PUBLIC_ADMIN_USERNAME=admin
 - NEXT_PUBLIC_ADMIN_PASSWORD=sterk-wachtwoord-123
 - BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
+- POSTGRES_URL=postgres://user:password@host:5432/db
 
 ## Deployen op Vercel
 1. Upload deze map naar GitHub of GitLab.

@@ -23,14 +23,18 @@ export default function AdminPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('stickerbedrijf-products');
-    if (stored) {
+    async function loadProducts() {
       try {
-        setProducts(JSON.parse(stored));
-      } catch {
-        setError('Kon producten niet laden.');
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Kon producten niet laden.');
+        setProducts(data.products ?? []);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : 'Kon producten niet laden.');
       }
     }
+
+    loadProducts();
   }, []);
 
   function resetForm() {
@@ -69,7 +73,7 @@ export default function AdminPage() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setMessage('');
@@ -85,34 +89,35 @@ export default function AdminPage() {
       return;
     }
 
-    const nextProducts = [...products];
-
-    if (editingId) {
-      const index = nextProducts.findIndex((product) => product.id === editingId);
-      if (index === -1) {
-        setError('Product niet gevonden.');
-        return;
-      }
-      nextProducts[index] = { ...nextProducts[index], name: form.name.trim(), description: form.description.trim(), price, imageUrl: form.imageUrl.trim() };
-      window.localStorage.setItem('stickerbedrijf-products', JSON.stringify(nextProducts));
-      setProducts(nextProducts);
-      setMessage('Product bijgewerkt.');
-    } else {
-      const newProduct: Product = {
-        id: crypto.randomUUID(),
+    try {
+      const payload = {
         name: form.name.trim(),
         description: form.description.trim(),
         price,
-        imageUrl: form.imageUrl.trim(),
-        createdAt: new Date().toISOString()
+        imageUrl: form.imageUrl.trim()
       };
-      const updated = [newProduct, ...nextProducts];
-      window.localStorage.setItem('stickerbedrijf-products', JSON.stringify(updated));
-      setProducts(updated);
-      setMessage('Product toegevoegd.');
-    }
 
-    resetForm();
+      const response = editingId
+        ? await fetch(`/api/products/${editingId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+        : await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Opslaan mislukt.');
+
+      setProducts(data.products ?? []);
+      setMessage(editingId ? 'Product bijgewerkt.' : 'Product toegevoegd.');
+      resetForm();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'Opslaan mislukt.');
+    }
   }
 
   function startEdit(product: Product) {
@@ -120,11 +125,16 @@ export default function AdminPage() {
     setForm({ name: product.name, description: product.description, price: product.price.toString(), imageUrl: product.imageUrl });
   }
 
-  function handleDelete(id: string) {
-    const nextProducts = products.filter((product) => product.id !== id);
-    window.localStorage.setItem('stickerbedrijf-products', JSON.stringify(nextProducts));
-    setProducts(nextProducts);
-    setMessage('Product verwijderd.');
+  async function handleDelete(id: string) {
+    try {
+      const response = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Verwijderen mislukt.');
+      setProducts(data.products ?? []);
+      setMessage('Product verwijderd.');
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : 'Verwijderen mislukt.');
+    }
   }
 
   function logout() {

@@ -1,3 +1,6 @@
+import { put } from '@vercel/blob';
+import { promises as fs } from 'fs';
+import path from 'path';
 import { Product, ProductInput } from './types';
 
 const initialProducts: Product[] = [
@@ -27,31 +30,75 @@ const initialProducts: Product[] = [
   }
 ];
 
-const storageKey = 'stickerbedrijf-products';
+const storageKey = 'products.json';
+const localFilePath = path.join(process.cwd(), '.data', storageKey);
 
-function getStoredProducts(): Product[] {
-  if (typeof window === 'undefined') return initialProducts;
-  const raw = window.localStorage.getItem(storageKey);
-  if (!raw) return initialProducts;
+async function ensureLocalDataDir() {
+  await fs.mkdir(path.dirname(localFilePath), { recursive: true });
+}
+
+async function readProductsFromLocalFile(): Promise<Product[]> {
   try {
-    return JSON.parse(raw) as Product[];
+    await ensureLocalDataDir();
+    const file = await fs.readFile(localFilePath, 'utf8');
+    const parsed = JSON.parse(file);
+    return Array.isArray(parsed) ? parsed : initialProducts;
   } catch {
     return initialProducts;
   }
 }
 
-function setStoredProducts(products: Product[]) {
-  if (typeof window !== 'undefined') {
-    window.localStorage.setItem(storageKey, JSON.stringify(products));
+async function writeProductsToLocalFile(products: Product[]) {
+  await ensureLocalDataDir();
+  await fs.writeFile(localFilePath, JSON.stringify(products, null, 2), 'utf8');
+}
+
+async function readProductsFromBlob(): Promise<Product[]> {
+  try {
+    const response = await fetch(`https://blob.vercel-storage.com/${storageKey}`);
+    if (!response.ok) return initialProducts;
+    const text = await response.text();
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : initialProducts;
+  } catch {
+    return initialProducts;
   }
 }
 
+async function writeProductsToBlob(products: Product[]) {
+  await put(storageKey, JSON.stringify(products, null, 2), {
+    access: 'public',
+    contentType: 'application/json'
+  });
+}
+
+async function getProductsFromStorage(): Promise<Product[]> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      return await readProductsFromBlob();
+    } catch {
+      return initialProducts;
+    }
+  }
+
+  return readProductsFromLocalFile();
+}
+
+async function setProductsInStorage(products: Product[]) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    await writeProductsToBlob(products);
+    return;
+  }
+
+  await writeProductsToLocalFile(products);
+}
+
 export async function getProducts(): Promise<Product[]> {
-  return getStoredProducts();
+  return getProductsFromStorage();
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
-  const products = getStoredProducts();
+  const products = await getProductsFromStorage();
   const product: Product = {
     id: crypto.randomUUID(),
     name: input.name.trim(),
@@ -60,24 +107,34 @@ export async function createProduct(input: ProductInput): Promise<Product> {
     imageUrl: input.imageUrl.trim(),
     createdAt: new Date().toISOString()
   };
+
   const nextProducts = [product, ...products];
-  setStoredProducts(nextProducts);
+  await setProductsInStorage(nextProducts);
   return product;
 }
 
 export async function updateProduct(id: string, input: ProductInput): Promise<Product> {
-  const products = getStoredProducts();
+  const products = await getProductsFromStorage();
   const index = products.findIndex((product) => product.id === id);
   if (index === -1) throw new Error('Product niet gevonden.');
-  const updated = { ...products[index], ...{ name: input.name.trim(), description: input.description.trim(), price: Number(input.price), imageUrl: input.imageUrl.trim() } };
+
+  const updated = {
+    ...products[index],
+    name: input.name.trim(),
+    description: input.description.trim(),
+    price: Number(input.price),
+    imageUrl: input.imageUrl.trim(),
+    createdAt: products[index].createdAt
+  };
+
   products[index] = updated;
-  setStoredProducts(products);
+  await setProductsInStorage(products);
   return updated;
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const products = getStoredProducts();
+  const products = await getProductsFromStorage();
   const nextProducts = products.filter((product) => product.id !== id);
   if (nextProducts.length === products.length) throw new Error('Product niet gevonden.');
-  setStoredProducts(nextProducts);
+  await setProductsInStorage(nextProducts);
 }

@@ -8,14 +8,18 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('stickerbedrijf-products');
-    if (stored) {
+    async function loadProducts() {
       try {
-        setProducts(JSON.parse(stored));
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Kon producten niet laden.');
+        setProducts(data.products ?? []);
       } catch {
         setProducts([]);
       }
     }
+
+    loadProducts();
   }, []);
 
   return (
