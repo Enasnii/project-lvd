@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
     const products = await getProducts();
     return NextResponse.json({ product, products });
   } catch (error) {
-    return NextResponse.json({ error: 'Kon product niet aanmaken.' }, { status: 500 });
+    console.error('products POST error', error);
+    const message = error instanceof Error ? error.message : 'Kon product niet aanmaken.';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

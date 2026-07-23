@@ -89,14 +89,14 @@ export default function AdminPage() {
       return;
     }
 
-    try {
-      const payload = {
-        name: form.name.trim(),
-        description: form.description.trim(),
-        price,
-        imageUrl: form.imageUrl.trim()
-      };
+    const payload = {
+      name: form.name.trim(),
+      description: form.description.trim(),
+      price,
+      imageUrl: form.imageUrl.trim()
+    };
 
+    try {
       const response = editingId
         ? await fetch(`/api/products/${editingId}`, {
             method: 'PUT',
@@ -116,7 +116,6 @@ export default function AdminPage() {
       setMessage(editingId ? 'Product bijgewerkt.' : 'Product toegevoegd.');
       resetForm();
     } catch (submitError) {
-      // If API fails (e.g., blob issues), fall back to localStorage so you can continue
       const fallbackMessage = submitError instanceof Error ? submitError.message : 'Opslaan mislukt.';
       // eslint-disable-next-line no-console
       console.warn('API save failed, falling back to localStorage:', fallbackMessage);
@@ -150,7 +149,6 @@ export default function AdminPage() {
           resetForm();
           return;
         } catch (localErr) {
-          // final fallback: show API error
           setError(fallbackMessage);
           return;
         }
