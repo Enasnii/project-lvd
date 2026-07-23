@@ -116,7 +116,47 @@ export default function AdminPage() {
       setMessage(editingId ? 'Product bijgewerkt.' : 'Product toegevoegd.');
       resetForm();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : 'Opslaan mislukt.');
+      // If API fails (e.g., blob issues), fall back to localStorage so you can continue
+      const fallbackMessage = submitError instanceof Error ? submitError.message : 'Opslaan mislukt.';
+      // eslint-disable-next-line no-console
+      console.warn('API save failed, falling back to localStorage:', fallbackMessage);
+
+      if (typeof window !== 'undefined') {
+        try {
+          const storedRaw = window.localStorage.getItem('stickerbedrijf-products');
+          const stored = storedRaw ? JSON.parse(storedRaw) as Product[] : [];
+          if (editingId) {
+            const index = stored.findIndex((p) => p.id === editingId);
+            if (index !== -1) {
+              stored[index] = { ...stored[index], name: payload.name, description: payload.description, price: payload.price, imageUrl: payload.imageUrl };
+            }
+            window.localStorage.setItem('stickerbedrijf-products', JSON.stringify(stored));
+            setProducts(stored);
+            setMessage('Product lokaal bijgewerkt.');
+          } else {
+            const newProduct: Product = {
+              id: crypto.randomUUID(),
+              name: payload.name,
+              description: payload.description,
+              price: payload.price,
+              imageUrl: payload.imageUrl,
+              createdAt: new Date().toISOString()
+            };
+            const updated = [newProduct, ...stored];
+            window.localStorage.setItem('stickerbedrijf-products', JSON.stringify(updated));
+            setProducts(updated);
+            setMessage('Product lokaal toegevoegd.');
+          }
+          resetForm();
+          return;
+        } catch (localErr) {
+          // final fallback: show API error
+          setError(fallbackMessage);
+          return;
+        }
+      }
+
+      setError(fallbackMessage);
     }
   }
 

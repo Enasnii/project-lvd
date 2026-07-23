@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteProduct, getProducts, updateProduct } from '@/lib/data';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request: NextRequest, context: { params: { id: string } }) {

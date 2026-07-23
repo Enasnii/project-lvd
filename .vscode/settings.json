@@ -1,5 +1,21 @@
 {
     "chat.tools.terminal.autoApprove": {
-        "npm install": true
+        "npm install": true,
+        "/^powershell -Command \"Invoke-RestMethod -Uri 'http://127\\.0\\.0\\.1:3000/api/products_debug' -Method POST -ContentType 'application/json' -Body '\\{\\\\\"name\\\\\":\\\\\"Test Add 2\\\\\",\\\\\"description\\\\\":\\\\\"debug\\\\\",\\\\\"price\\\\\":1\\.23,\\\\\"imageUrl\\\\\":\\\\\"https://example\\.com/a\\.jpg\\\\\"\\}' \\| ConvertTo-Json -Depth 5\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^node \"c:\\\\Users\\\\pelie\\\\Desktop\\\\Project LVD\\\\scripts\\\\test-blob\\.js\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^powershell -NoProfile -Command \"node 'c:\\\\Users\\\\pelie\\\\Desktop\\\\Project LVD\\\\scripts\\\\test-blob\\.js'\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^node \"c:/Users/pelie/Desktop/Project LVD/scripts/test-blob\\.js\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     }
 }

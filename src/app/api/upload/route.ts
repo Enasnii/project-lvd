@@ -1,5 +1,6 @@
-import { put } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Bestand is te groot. Maximaal 5MB.' }, { status: 400 });
     }
 
+    const { put } = await import('@vercel/blob');
     const blob = await put(file.name, file, {
       access: 'public',
       contentType: file.type
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url: blob.url });
   } catch (error) {
+    console.error('upload error', error);
     return NextResponse.json({ error: 'Upload mislukt.' }, { status: 500 });
   }
 }

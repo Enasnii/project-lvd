@@ -1,4 +1,3 @@
-import { put } from '@vercel/blob';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Product, ProductInput } from './types';
@@ -66,6 +65,7 @@ async function readProductsFromBlob(): Promise<Product[]> {
 }
 
 async function writeProductsToBlob(products: Product[]) {
+  const { put } = await import('@vercel/blob');
   await put(storageKey, JSON.stringify(products, null, 2), {
     access: 'public',
     contentType: 'application/json'
@@ -114,19 +114,32 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {
-  const products = await getProductsFromStorage();
-  const product: Product = {
-    id: crypto.randomUUID(),
-    name: input.name.trim(),
-    description: input.description.trim(),
-    price: Number(input.price),
-    imageUrl: input.imageUrl.trim(),
-    createdAt: new Date().toISOString()
-  };
+  try {
+    const products = await getProductsFromStorage();
+    const product: Product = {
+      id: crypto.randomUUID(),
+      name: input.name.trim(),
+      description: input.description.trim(),
+      price: Number(input.price),
+      imageUrl: input.imageUrl.trim(),
+      createdAt: new Date().toISOString()
+    };
 
-  const nextProducts = [product, ...products];
-  await setProductsInStorage(nextProducts);
-  return product;
+    const nextProducts = [product, ...products];
+    await setProductsInStorage(nextProducts);
+    return product;
+  } catch (err) {
+    // write error to a file so we can inspect it from the workspace
+    try {
+      await ensureLocalDataDir();
+      const errPath = path.join(process.cwd(), '.data', 'error.log');
+      const msg = err instanceof Error ? `${new Date().toISOString()} - ${err.stack || err.message}` : `${new Date().toISOString()} - ${String(err)}`;
+      await fs.appendFile(errPath, msg + '\n', 'utf8');
+    } catch (_) {
+      // ignore logging failures
+    }
+    throw err;
+  }
 }
 
 export async function updateProduct(id: string, input: ProductInput): Promise<Product> {
