@@ -12,12 +12,7 @@ Een volledige, productie-klare Next.js-app voor een stickerbedrijf met:
 - Local browser storage voor demo-data op Vercel (geen database nodig)
 - Geen externe image-hosting vereist; gebruik directe afbeeldings-URLs
 
-## Lokale ontwikkeling
-1. Installeer dependencies:
-   `npm install`
-2. Start de ontwikkelserver:
-   `npm run dev`
-3. Open http://localhost:3000
+
 
 ## Omgevingsvariabelen
 Stel deze variabelen in in Vercel > Project > Settings > Environment Variables:
