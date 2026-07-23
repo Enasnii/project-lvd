@@ -72,12 +72,20 @@ async function writeProductsToBlob(products: Product[]) {
   });
 }
 
+// Use Blob storage only in production when a token is configured.
+function useBlobStorage() {
+  return process.env.NODE_ENV === 'production' && Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
 async function getProductsFromStorage(): Promise<Product[]> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (useBlobStorage()) {
     try {
       return await readProductsFromBlob();
-    } catch {
-      return initialProducts;
+    } catch (err) {
+      // log and fall back to local file
+      // eslint-disable-next-line no-console
+      console.error('Failed to read products from Blob, falling back to local file:', err);
+      return readProductsFromLocalFile();
     }
   }
 
@@ -85,9 +93,17 @@ async function getProductsFromStorage(): Promise<Product[]> {
 }
 
 async function setProductsInStorage(products: Product[]) {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    await writeProductsToBlob(products);
-    return;
+  if (useBlobStorage()) {
+    try {
+      await writeProductsToBlob(products);
+      return;
+    } catch (err) {
+      // log error and fall back to local file to avoid failing requests
+      // eslint-disable-next-line no-console
+      console.error('Failed to write products to Blob, writing to local file instead:', err);
+      await writeProductsToLocalFile(products);
+      return;
+    }
   }
 
   await writeProductsToLocalFile(products);
