@@ -6,7 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const products = await getProducts();
-  return NextResponse.json({ products });
+  return NextResponse.json(
+    { products },
+    { headers: { 'Cache-Control': 'no-store' } }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -14,7 +17,10 @@ export async function POST(request: NextRequest) {
     const input = await request.json();
     const product = await createProduct(input);
     const products = await getProducts();
-    return NextResponse.json({ product, products });
+    return NextResponse.json(
+      { product, products },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch (error) {
     console.error('products POST error', error);
     const message = error instanceof Error ? error.message : 'Kon product niet aanmaken.';

@@ -1,138 +1,34 @@
-import { promises as fs } from 'fs';
-import path from 'path';
 import { Product, ProductInput } from './types';
+import {
+  createProduct as createStoredProduct,
+  deleteProduct as deleteStoredProduct,
+  getProducts as getStoredProducts,
+  updateProduct as updateStoredProduct
+} from './products-store';
 
-const initialProducts: Product[] = [];
-
-const storageKey = 'products.json';
-const localFilePath = path.join(process.cwd(), '.data', storageKey);
-
-async function ensureLocalDataDir() {
-  await fs.mkdir(path.dirname(localFilePath), { recursive: true });
-}
-
-async function readProductsFromLocalFile(): Promise<Product[]> {
-  try {
-    await ensureLocalDataDir();
-    const file = await fs.readFile(localFilePath, 'utf8');
-    const parsed = JSON.parse(file);
-
-    return Array.isArray(parsed) ? parsed : initialProducts;
-  } catch {
-    return initialProducts;
-  }
-}
-
-async function writeProductsToLocalFile(products: Product[]) {
-  await ensureLocalDataDir();
-
-  await fs.writeFile(
-    localFilePath,
-    JSON.stringify(products, null, 2),
-    'utf8'
-  );
-}
-
-
-/**
- * Upload image to Vercel Blob
- */
-export async function uploadImageToBlob(
-  file: File
-): Promise<string> {
-
+export async function uploadImageToBlob(file: File): Promise<string> {
   const { put } = await import('@vercel/blob');
 
-  const blob = await put(
-    file.name,
-    file,
-    {
-      access: 'public',
-      contentType: file.type
-    }
-  );
+  const blob = await put(file.name, file, {
+    access: 'public',
+    contentType: file.type
+  });
 
   return blob.url;
 }
 
-
 export async function getProducts(): Promise<Product[]> {
-  return readProductsFromLocalFile();
+  return getStoredProducts();
 }
 
-
-export async function createProduct(
-  input: ProductInput
-): Promise<Product> {
-
-  const products = await getProducts();
-
-  const product: Product = {
-    id: crypto.randomUUID(),
-    name: input.name.trim(),
-    description: input.description.trim(),
-    price: Number(input.price),
-    imageUrl: input.imageUrl.trim(),
-    createdAt: new Date().toISOString()
-  };
-
-
-  await writeProductsToLocalFile([
-    product,
-    ...products
-  ]);
-
-  return product;
+export async function createProduct(input: ProductInput): Promise<Product> {
+  return createStoredProduct(input);
 }
 
-
-export async function updateProduct(
-  id: string,
-  input: ProductInput
-): Promise<Product> {
-
-  const products = await getProducts();
-
-  const index = products.findIndex(
-    product => product.id === id
-  );
-
-  if (index === -1) {
-    throw new Error('Product niet gevonden.');
-  }
-
-
-  const updatedProduct = {
-    ...products[index],
-    name: input.name.trim(),
-    description: input.description.trim(),
-    price: Number(input.price),
-    imageUrl: input.imageUrl.trim()
-  };
-
-
-  products[index] = updatedProduct;
-
-  await writeProductsToLocalFile(products);
-
-  return updatedProduct;
+export async function updateProduct(id: string, input: ProductInput): Promise<Product> {
+  return updateStoredProduct(id, input);
 }
 
-
-export async function deleteProduct(
-  id: string
-): Promise<void> {
-
-  const products = await getProducts();
-
-  const filtered = products.filter(
-    product => product.id !== id
-  );
-
-  if (filtered.length === products.length) {
-    throw new Error('Product niet gevonden.');
-  }
-
-
-  await writeProductsToLocalFile(filtered);
+export async function deleteProduct(id: string): Promise<void> {
+  return deleteStoredProduct(id);
 }

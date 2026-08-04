@@ -25,7 +25,7 @@ export default function AdminPage() {
   useEffect(() => {
     async function loadProducts() {
       try {
-        const response = await fetch('/api/products');
+        const response = await fetch('/api/products', { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || 'Kon producten niet laden.');
         setProducts(data.products ?? []);

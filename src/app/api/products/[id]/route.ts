@@ -9,7 +9,10 @@ export async function PUT(request: NextRequest, context: { params: { id: string 
     const input = await request.json();
     const product = await updateProduct(context.params.id, input);
     const products = await getProducts();
-    return NextResponse.json({ product, products });
+    return NextResponse.json(
+      { product, products },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch (error) {
     return NextResponse.json({ error: 'Kon product niet bijwerken.' }, { status: 500 });
   }
@@ -19,7 +22,10 @@ export async function DELETE(_request: NextRequest, context: { params: { id: str
   try {
     await deleteProduct(context.params.id);
     const products = await getProducts();
-    return NextResponse.json({ success: true, products });
+    return NextResponse.json(
+      { success: true, products },
+      { headers: { 'Cache-Control': 'no-store' } }
+    );
   } catch (error) {
     return NextResponse.json({ error: 'Kon product niet verwijderen.' }, { status: 500 });
   }
