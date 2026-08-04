@@ -51,12 +51,9 @@ export default function AdminPage() {
     setIsUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload', {
+      const response = await fetch(`/api/avatar/upload?filename=${encodeURIComponent(file.name)}`, {
         method: 'POST',
-        body: formData
+        body: file
       });
 
       const data = await response.json();

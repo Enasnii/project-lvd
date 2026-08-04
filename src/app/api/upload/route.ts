@@ -22,6 +22,18 @@ async function saveFileLocally(file: File) {
   return `/uploads/${uniqueName}`;
 }
 
+async function uploadToBlob(file: File) {
+  const { put } = await import('@vercel/blob');
+  const safeName = sanitizeFileName(file.name || 'upload');
+
+  const blob = await put(safeName, file, {
+    access: 'public',
+    contentType: file.type
+  });
+
+  return blob.url;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -37,14 +49,10 @@ export async function POST(request: NextRequest) {
 
     if (process.env.NODE_ENV === 'production' && process.env.BLOB_READ_WRITE_TOKEN) {
       try {
-        const { put } = await import('@vercel/blob');
-        const blob = await put(file.name || 'upload', file, {
-          access: 'public',
-          contentType: file.type
-        });
-        return NextResponse.json({ url: blob.url });
+        const url = await uploadToBlob(file);
+        return NextResponse.json({ url });
       } catch (blobError) {
-        console.warn('Blob upload failed, falling back to local file storage:', blobError);
+        console.warn('Blob upload failed, falling back to local file storage. If you want public URLs from Vercel Blob, make sure the store is configured for public access:', blobError);
       }
     }
 
