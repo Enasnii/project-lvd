@@ -2,16 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { Product, ProductInput } from './types';
 
-const initialProducts: Product[] = [
-  {
-    id: 'sample-1',
-    name: 'Premium Vinyl Sticker',
-    description: 'Duurzame vinyl sticker voor verpakking en promoties.',
-    price: 14.95,
-    imageUrl: '',
-    createdAt: new Date().toISOString()
-  }
-];
+const initialProducts: Product[] = [];
 
 const storageKey = 'products.json';
 const localFilePath = path.join(process.cwd(), '.data', storageKey);

@@ -1,32 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { Product, ProductInput } from './types';
 
-const initialProducts: Product[] = [
-  {
-    id: 'sample-1',
-    name: 'Premium Vinyl Sticker',
-    description: 'Duurzame vinyl sticker voor verpakking en promoties.',
-    price: 14.95,
-    imageUrl: 'https://images.unsplash.com/photo-1582053433976-25c00369fc93?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 'sample-2',
-    name: 'Matte Label Set',
-    description: 'Set van 10 matte labels voor producten en verpakkingen.',
-    price: 24.5,
-    imageUrl: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 'sample-3',
-    name: 'Event Promo Sticker',
-    description: 'Opvallende sticker voor beurs-, festival- en launch-events.',
-    price: 9.95,
-    imageUrl: 'https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=800&q=80',
-    createdAt: new Date().toISOString()
-  }
-];
+const initialProducts: Product[] = [];
 
 async function ensureProductsTable() {
   await sql`
