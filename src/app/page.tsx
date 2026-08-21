@@ -25,9 +25,9 @@ export default function HomePage() {
   return (
     <main className="container">
       <nav>
-    
         <div className="nav-links">
           <Link href="#prijzen">Prijslijst</Link>
+          <Link href="/product-aanvragen" className="btn btn-secondary">Product aanvragen</Link>
           <Link className="btn btn-secondary" href="/admin/login">Admin login</Link>
         </div>
       </nav>
