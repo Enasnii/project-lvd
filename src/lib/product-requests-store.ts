@@ -6,7 +6,8 @@ const requestStoragePrefix = 'data/product-requests/';
 const migrationMarkerPath = 'data/product-requests-migrated.json';
 
 async function readJsonBlob(url: string): Promise<ProductRequest[]> {
-  const response = await fetch(url, { cache: 'no-store' });
+  const separator = url.includes('?') ? '&' : '?';
+  const response = await fetch(`${url}${separator}cacheBust=${Date.now()}`, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Aanvragen konden niet worden gelezen (${response.status}).`);
 
   const parsed = await response.json();
