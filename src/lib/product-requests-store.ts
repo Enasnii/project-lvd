@@ -1,19 +1,33 @@
-import { list, put } from '@vercel/blob';
+import { del, list, put } from '@vercel/blob';
 import { ProductRequest, ProductRequestInput } from './types';
 
 const storagePath = 'data/product-requests.json';
+const requestStoragePrefix = 'data/product-requests/';
 
-async function readRequests(): Promise<ProductRequest[]> {
-  const result = await list({ prefix: storagePath, limit: 1 });
-  const blob = result.blobs.find((item) => item.pathname === storagePath);
-
-  if (!blob) return [];
-
-  const response = await fetch(blob.url, { cache: 'no-store' });
+async function readJsonBlob(url: string): Promise<ProductRequest[]> {
+  const response = await fetch(url, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Aanvragen konden niet worden gelezen (${response.status}).`);
 
   const parsed = await response.json();
   return Array.isArray(parsed) ? parsed as ProductRequest[] : [];
+}
+
+async function readRequests(): Promise<ProductRequest[]> {
+  const requests: ProductRequest[] = [];
+  const result = await list({ prefix: storagePath, limit: 1 });
+  const blob = result.blobs.find((item) => item.pathname === storagePath);
+  if (blob) requests.push(...await readJsonBlob(blob.url));
+
+  const requestBlobs = await list({ prefix: requestStoragePrefix });
+  const storedRequests = await Promise.all(
+    requestBlobs.blobs.map((requestBlob) => readJsonBlob(requestBlob.url))
+  );
+
+  for (const storedRequest of storedRequests) {
+    requests.push(...storedRequest);
+  }
+
+  return requests.sort((first, second) => second.createdAt.localeCompare(first.createdAt));
 }
 
 async function writeRequests(requests: ProductRequest[]) {
@@ -43,8 +57,11 @@ export async function createProductRequest(input: ProductRequestInput): Promise<
     createdAt: new Date().toISOString()
   };
 
-  const requests = await readRequests();
-  await writeRequests([request, ...requests]);
+  await put(`${requestStoragePrefix}${request.id}.json`, JSON.stringify([request]), {
+    access: 'public',
+    addRandomSuffix: false,
+    contentType: 'application/json'
+  });
   return request;
 }
 
@@ -53,9 +70,18 @@ export async function deleteProductRequest(id: string): Promise<void> {
     throw new Error('BLOB_READ_WRITE_TOKEN ontbreekt.');
   }
 
+  const requestBlobs = await list({ prefix: requestStoragePrefix });
+  const requestBlob = requestBlobs.blobs.find((blob) => blob.pathname === `${requestStoragePrefix}${id}.json`);
+  if (requestBlob) {
+    await del(requestBlob.url);
+    return;
+  }
+
   const requests = await readRequests();
   const filtered = requests.filter((request) => request.id !== id);
-  if (filtered.length === requests.length) throw new Error('Aanvraag niet gevonden.');
+  if (filtered.length === requests.length) {
+    throw new Error('Aanvraag niet gevonden.');
+  }
 
   await writeRequests(filtered);
 }
