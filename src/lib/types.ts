@@ -13,3 +13,19 @@ export type ProductInput = {
   price: string;
   imageUrl: string;
 };
+
+export type ProductRequestInput = {
+  name: string;
+  email: string;
+  phone: string;
+  product: string;
+  quantity: number;
+  date: string;
+  message: string;
+  imageUrl: string;
+};
+
+export type ProductRequest = ProductRequestInput & {
+  id: string;
+  createdAt: string;
+};

@@ -18,7 +18,7 @@ export default function Page() {
         <ProductRequestForm />
 
         <div className="mt-8 text-sm text-gray-600">
-          <p>Na het versturen ontvang je een bevestiging op het scherm. De ingevoerde gegevens en de eventuele afbeelding worden per e-mail naar ons verzonden en de afbeelding wordt meegestuurd als bijlage.</p>
+          <p>Na het versturen ontvang je een bevestiging op het scherm. We bewaren je aanvraag veilig zodat we die vanuit het adminpanel kunnen behandelen.</p>
         </div>
       </div>
     </main>
