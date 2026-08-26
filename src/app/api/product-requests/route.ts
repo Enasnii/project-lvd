@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/auth';
-import { deleteProductRequest, getProductRequests } from '@/lib/product-requests-store';
+import { deleteProductRequest, getProductRequests, updateProductRequestStatus } from '@/lib/product-requests-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -35,5 +35,24 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('product request DELETE error', error);
     return NextResponse.json({ error: 'Aanvraag kon niet worden verwijderd.' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: 'Niet ingelogd.' }, { status: 401 });
+  }
+
+  try {
+    const { id, status } = await request.json();
+    if (typeof id !== 'string' || !id || !['new', 'in_progress', 'completed'].includes(status)) {
+      return NextResponse.json({ error: 'Ongeldige aanvraagstatus.' }, { status: 400 });
+    }
+
+    const updatedRequest = await updateProductRequestStatus(id, status);
+    return NextResponse.json({ request: updatedRequest });
+  } catch (error) {
+    console.error('product request PATCH error', error);
+    return NextResponse.json({ error: 'Status kon niet worden opgeslagen.' }, { status: 500 });
   }
 }

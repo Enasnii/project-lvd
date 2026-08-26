@@ -25,7 +25,10 @@ export type ProductRequestInput = {
   imageUrl: string;
 };
 
+export type ProductRequestStatus = 'new' | 'in_progress' | 'completed';
+
 export type ProductRequest = ProductRequestInput & {
   id: string;
   createdAt: string;
+  status: ProductRequestStatus;
 };

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
-import { Product, ProductInput, ProductRequest } from '@/lib/types';
+import { Product, ProductInput, ProductRequest, ProductRequestStatus } from '@/lib/types';
 
 const initialForm: ProductInput = {
   name: '',
@@ -201,6 +201,21 @@ export default function AdminPage() {
     }
   }
 
+  async function handleRequestStatusChange(id: string, status: ProductRequestStatus) {
+    try {
+      const response = await fetch('/api/product-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Status opslaan mislukt.');
+      setRequests((current) => current.map((request) => request.id === id ? data.request : request));
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Status opslaan mislukt.');
+    }
+  }
+
   function logout() {
     clearAdminAuthCookie();
     router.push('/admin/login');
@@ -288,6 +303,16 @@ export default function AdminPage() {
                 {request.message ? <p><strong>Bericht:</strong> {request.message}</p> : null}
                 {request.imageUrl ? <p><a href={request.imageUrl} target="_blank" rel="noreferrer">Afbeelding bekijken</a></p> : null}
                 <p><small>{new Date(request.createdAt).toLocaleString('nl-NL')}</small></p>
+                <label>Status
+                  <select
+                    value={request.status}
+                    onChange={(event) => handleRequestStatusChange(request.id, event.target.value as ProductRequestStatus)}
+                  >
+                    <option value="new">Nieuw</option>
+                    <option value="in_progress">In behandeling</option>
+                    <option value="completed">Afgerond</option>
+                  </select>
+                </label>
                 <button className="btn btn-secondary" onClick={() => handleDeleteRequest(request.id)}>Verwijderen</button>
               </article>
             ))}

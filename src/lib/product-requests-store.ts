@@ -1,5 +1,5 @@
 import { del, list, put } from '@vercel/blob';
-import { ProductRequest, ProductRequestInput } from './types';
+import { ProductRequest, ProductRequestInput, ProductRequestStatus } from './types';
 
 const storagePath = 'data/product-requests.json';
 const requestStoragePrefix = 'data/product-requests/';
@@ -10,7 +10,9 @@ async function readJsonBlob(url: string): Promise<ProductRequest[]> {
   if (!response.ok) throw new Error(`Aanvragen konden niet worden gelezen (${response.status}).`);
 
   const parsed = await response.json();
-  return Array.isArray(parsed) ? parsed as ProductRequest[] : [];
+  return Array.isArray(parsed)
+    ? (parsed as ProductRequest[]).map((request) => ({ ...request, status: request.status ?? 'new' }))
+    : [];
 }
 
 async function readRequests(): Promise<ProductRequest[]> {
@@ -76,7 +78,8 @@ export async function createProductRequest(input: ProductRequestInput): Promise<
   const request: ProductRequest = {
     id: crypto.randomUUID(),
     ...input,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    status: 'new'
   };
 
   await put(`${requestStoragePrefix}${request.id}.json`, JSON.stringify([request]), {
@@ -85,6 +88,28 @@ export async function createProductRequest(input: ProductRequestInput): Promise<
     contentType: 'application/json'
   });
   return request;
+}
+
+export async function updateProductRequestStatus(id: string, status: ProductRequestStatus): Promise<ProductRequest> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error('BLOB_READ_WRITE_TOKEN ontbreekt.');
+  }
+
+  const requestBlobs = await list({ prefix: requestStoragePrefix });
+  const requestBlob = requestBlobs.blobs.find((blob) => blob.pathname === `${requestStoragePrefix}${id}.json`);
+  if (!requestBlob) throw new Error('Aanvraag niet gevonden.');
+
+  const stored = await readJsonBlob(requestBlob.url);
+  const request = stored[0];
+  if (!request) throw new Error('Aanvraag niet gevonden.');
+
+  const updatedRequest = { ...request, status };
+  await put(requestBlob.pathname, JSON.stringify([updatedRequest]), {
+    access: 'public',
+    addRandomSuffix: false,
+    contentType: 'application/json'
+  });
+  return updatedRequest;
 }
 
 export async function deleteProductRequest(id: string): Promise<void> {
