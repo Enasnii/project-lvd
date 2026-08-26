@@ -3,6 +3,7 @@ import { ProductRequest, ProductRequestInput } from './types';
 
 const storagePath = 'data/product-requests.json';
 const requestStoragePrefix = 'data/product-requests/';
+const migrationMarkerPath = 'data/product-requests-migrated.json';
 
 async function readJsonBlob(url: string): Promise<ProductRequest[]> {
   const response = await fetch(url, { cache: 'no-store' });
@@ -14,9 +15,30 @@ async function readJsonBlob(url: string): Promise<ProductRequest[]> {
 
 async function readRequests(): Promise<ProductRequest[]> {
   const requests: ProductRequest[] = [];
-  const result = await list({ prefix: storagePath, limit: 1 });
-  const blob = result.blobs.find((item) => item.pathname === storagePath);
-  if (blob) requests.push(...await readJsonBlob(blob.url));
+  const markerResult = await list({ prefix: migrationMarkerPath, limit: 1 });
+  const isMigrated = markerResult.blobs.some((item) => item.pathname === migrationMarkerPath);
+
+  if (!isMigrated) {
+    const result = await list({ prefix: storagePath, limit: 1 });
+    const legacyBlob = result.blobs.find((item) => item.pathname === storagePath);
+    if (legacyBlob) {
+      const legacyRequests = await readJsonBlob(legacyBlob.url);
+      for (const request of legacyRequests) {
+        await put(`${requestStoragePrefix}${request.id}.json`, JSON.stringify([request]), {
+          access: 'public',
+          addRandomSuffix: false,
+          contentType: 'application/json'
+        });
+      }
+
+      await put(migrationMarkerPath, 'migrated', {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: 'text/plain'
+      });
+      await del(legacyBlob.url);
+    }
+  }
 
   const requestBlobs = await list({ prefix: requestStoragePrefix });
   const storedRequests = await Promise.all(
