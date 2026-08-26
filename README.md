@@ -9,8 +9,8 @@ Een volledige, productie-klare Next.js-app voor een stickerbedrijf met:
 ## Stack
 - Next.js App Router
 - React + TypeScript
-- Local browser storage voor demo-data op Vercel (geen database nodig)
-- Geen externe image-hosting vereist; gebruik directe afbeeldings-URLs
+- Vercel Postgres voor productdata, met Vercel Blob als duurzame fallback
+- Vercel Blob voor afbeeldingen en productdata wanneer Postgres niet beschikbaar is
 
 ## Lokale ontwikkeling
 1. Installeer dependencies:
@@ -45,4 +45,4 @@ Voorbeeldwaarden:
 - Server-side inputvalidatie wordt gedaan in de admin-flow.
 
 ## Opmerking
-Voor productie met meerdere admins of echte persistence is het verstandig om over te stappen op Supabase of Vercel Postgres plus een echte image-oplossing zoals Vercel Blob of Cloudinary.
+Productdata wordt eerst opgeslagen in Postgres. Als Postgres tijdelijk niet beschikbaar is, gebruikt de app `data/products.json` in Vercel Blob. Zonder database of Blob-token is de lokale bestandsopslag alleen geschikt voor lokale ontwikkeling; bestanden in `/tmp` zijn op Vercel niet permanent.

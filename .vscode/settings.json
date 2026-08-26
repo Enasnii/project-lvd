@@ -16,6 +16,10 @@
         "/^node \"c:/Users/pelie/Desktop/Project LVD/scripts/test-blob\\.js\"$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^Get-Content \\.env\\.local \\| ForEach-Object \\{ if \\(\\$_ -match '\\^\\\\s\\*\\(\\[A-Za-z_\\]\\[A-Za-z0-9_\\]\\*\\)='\\) \\{ \\$matches\\[1\\] \\} \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

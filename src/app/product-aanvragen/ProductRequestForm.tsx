@@ -77,7 +77,7 @@ export default function ProductRequestForm() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="form-card shadow-md">
       <form onSubmit={handleSubmit} noValidate>
         <div className="mb-4">
           <label className="block font-medium mb-1">Naam *</label>

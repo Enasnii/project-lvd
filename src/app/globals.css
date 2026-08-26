@@ -65,3 +65,26 @@ th, td { padding: 0.9rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
 nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
 .nav-links { display: flex; gap: 1rem; align-items: center; }
 @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .hero { padding: 1.5rem; } }
+
+/* Small form card to keep the request form compact on the page */
+.form-card {
+  max-width: 520px; /* keeps the form from taking the full page */
+  margin: 0 auto;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.96);
+}
+
+/* Slightly smaller inputs for compact layout */
+.form-card input[type="text"],
+.form-card input[type="email"],
+.form-card input[type="number"],
+.form-card input[type="date"],
+.form-card textarea {
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+}
+
+/* Make the action row wrap nicely on small screens */
+.form-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+

@@ -5,12 +5,32 @@ import { Product, ProductInput } from './types';
 
 const initialProducts: Product[] = [];
 const fallbackStoragePath = process.env.PRODUCTS_STORAGE_FILE ?? path.join('/tmp', 'products.json');
+const blobStoragePath = 'data/products.json';
 
 async function ensureFallbackStorageFile() {
   await fs.mkdir(path.dirname(fallbackStoragePath), { recursive: true });
 }
 
 async function readFallbackProducts(): Promise<Product[]> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { list } = await import('@vercel/blob');
+      const result = await list({ prefix: blobStoragePath, limit: 1 });
+      const blob = result.blobs.find((item) => item.pathname === blobStoragePath);
+
+      if (!blob) return initialProducts;
+
+      const response = await fetch(blob.url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Blob metadata request failed with ${response.status}`);
+
+      const parsed = await response.json();
+      return Array.isArray(parsed) ? parsed : initialProducts;
+    } catch (error) {
+      console.warn('Blob product storage read failed.', error);
+      throw error;
+    }
+  }
+
   try {
     await ensureFallbackStorageFile();
     const file = await fs.readFile(fallbackStoragePath, 'utf8');
@@ -22,6 +42,16 @@ async function readFallbackProducts(): Promise<Product[]> {
 }
 
 async function writeFallbackProducts(products: Product[]) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const { put } = await import('@vercel/blob');
+    await put(blobStoragePath, JSON.stringify(products, null, 2), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json'
+    });
+    return;
+  }
+
   await ensureFallbackStorageFile();
   await fs.writeFile(fallbackStoragePath, JSON.stringify(products, null, 2), 'utf8');
 }
