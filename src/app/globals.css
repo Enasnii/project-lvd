@@ -64,6 +64,7 @@ th, td { padding: 0.9rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
 .status { color: #047857; font-weight: 700; }
 .error { color: #b91c1c; font-weight: 700; }
 .success { color: #047857; font-weight: 700; }
+.text-red-600 { color: #b91c1c; font-weight: 600; }
 nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; }
 .site-header { min-height: 76px; border-bottom: 1px solid rgba(148,163,184,0.25); }
 .brand-mark { display: inline-flex; align-items: center; gap: 0.7rem; color: #111827; }
