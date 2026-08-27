@@ -1,9 +1,9 @@
 "use client";
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { setAdminAuthCookie } from '@/lib/auth';
+import SiteHeader from '../../SiteHeader';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -29,12 +29,7 @@ export default function AdminLoginPage() {
 
   return (
     <main className="container" style={{ paddingBottom: '3rem' }}>
-      <nav>
-        <div><strong>Stickerbedrijf Admin</strong></div>
-        <div className="nav-links">
-          <Link href="/">Terug naar site</Link>
-        </div>
-      </nav>
+      <SiteHeader />
       <section className="hero">
         <h1>Admin login</h1>
         <p>Voer je gebruikersnaam en wachtwoord in om toegang te krijgen tot het beheer.</p>

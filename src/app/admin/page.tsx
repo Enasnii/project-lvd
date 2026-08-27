@@ -1,11 +1,11 @@
 "use client";
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
 import { Product, ProductInput, ProductRequest, ProductRequestStatus } from '@/lib/types';
 import PageManager from './PageManager';
+import SiteHeader from '../SiteHeader';
 
 const initialForm: ProductInput = {
   name: '',
@@ -224,13 +224,11 @@ export default function AdminPage() {
 
   return (
     <main className="container" style={{ paddingBottom: '3rem' }}>
-      <nav>
-        <div><strong>Stickerbedrijf Admin</strong></div>
-        <div className="nav-links">
-          <Link href="/">Publieke pagina</Link>
-          <button className="btn btn-secondary" onClick={logout}>Uitloggen</button>
-        </div>
-      </nav>
+      <SiteHeader />
+      <div className="admin-toolbar">
+        <span>Beheeromgeving</span>
+        <button className="btn btn-secondary" onClick={logout}>Uitloggen</button>
+      </div>
 
       <section className="hero">
         <h1>Producten beheren</h1>
