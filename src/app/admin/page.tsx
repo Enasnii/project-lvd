@@ -6,6 +6,7 @@ import { clearAdminAuthCookie } from '@/lib/auth';
 import { Product, ProductInput, ProductRequest, ProductRequestStatus } from '@/lib/types';
 import PageManager from './PageManager';
 import SiteHeader from '../SiteHeader';
+import Link from 'next/link';
 
 const initialForm: ProductInput = {
   name: '',
@@ -226,7 +227,7 @@ export default function AdminPage() {
     <main className="container" style={{ paddingBottom: '3rem' }}>
       <SiteHeader />
       <div className="admin-toolbar">
-        <span>Beheeromgeving</span>
+        <div><span>Beheeromgeving</span><Link href="/admin/product-aanvragen" className="admin-toolbar-link">Productaanvragen</Link></div>
         <button className="btn btn-secondary" onClick={logout}>Uitloggen</button>
       </div>
 
