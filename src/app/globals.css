@@ -124,7 +124,7 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
   margin: 0 auto;
   padding: 1rem;
   border-radius: 14px;
-  background: rgba(255,255,255,0.96);
+  background: transparent;
 }
 
 /* Slightly smaller inputs for compact layout */
