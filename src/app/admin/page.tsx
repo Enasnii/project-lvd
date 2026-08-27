@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
 import { Product, ProductInput, ProductRequest, ProductRequestStatus } from '@/lib/types';
+import PageManager from './PageManager';
 
 const initialForm: ProductInput = {
   name: '',
@@ -287,6 +288,8 @@ export default function AdminPage() {
           </tbody>
         </table>
       </section>
+
+      <PageManager />
 
       <section className="table-card">
         <h2>Productaanvragen</h2>

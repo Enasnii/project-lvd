@@ -32,3 +32,24 @@ export type ProductRequest = ProductRequestInput & {
   createdAt: string;
   status: ProductRequestStatus;
 };
+
+export type SitePage = {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  published: boolean;
+  showInMenu: boolean;
+  menuOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SitePageInput = {
+  title: string;
+  slug: string;
+  content: string;
+  published: boolean;
+  showInMenu: boolean;
+  menuOrder: number;
+};
