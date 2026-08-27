@@ -15,15 +15,22 @@ export default function SiteHeader() {
   }, []);
 
   return (
-    <nav>
-      <Link href="/"><strong>Lakenvelder Design</strong></Link>
-      <div className="nav-links">
-        <Link href="/#prijzen">Prijslijst</Link>
+    <nav className="site-header" aria-label="Hoofdnavigatie">
+      <Link href="/" className="brand-mark">
+        <span className="brand-mark-symbol">LD</span>
+        <span><strong>Lakenvelder Design</strong><small>Print & design</small></span>
+      </Link>
+      <div className="nav-links site-nav-links">
+        <div className="site-nav-main">
+          <Link href="/#prijzen">Prijslijst</Link>
         {pages.filter((page) => page.published && page.showInMenu).map((page) => (
           <Link key={page.id} href={`/${page.slug}`}>{page.title}</Link>
         ))}
-        <Link href="/product-aanvragen" className="btn btn-secondary">Product aanvragen</Link>
-        <Link href="/admin/login" className="btn btn-secondary">Admin login</Link>
+        </div>
+        <div className="site-nav-actions">
+          <Link href="/admin/login" className="admin-link">Admin</Link>
+          <Link href="/product-aanvragen" className="btn btn-primary">Offerte aanvragen</Link>
+        </div>
       </div>
     </nav>
   );
