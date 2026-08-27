@@ -17,7 +17,9 @@ export default function SiteHeader() {
   return (
     <nav className="site-header" aria-label="Hoofdnavigatie">
       <Link href="/" className="brand-mark">
-        <span className="brand-mark-symbol">LD</span>
+        <span className="brand-mark-symbol">
+          <img src="/logo.png" alt="" />
+        </span>
         <span><strong>Lakenvelder Design</strong><small>Print & design</small></span>
       </Link>
       <div className="nav-links site-nav-links">
