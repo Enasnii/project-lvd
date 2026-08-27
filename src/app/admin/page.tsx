@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
-import { Product, ProductInput, ProductRequest, ProductRequestStatus } from '@/lib/types';
+import { Product, ProductInput } from '@/lib/types';
 import PageManager from './PageManager';
 import SiteHeader from '../SiteHeader';
 import Link from 'next/link';
@@ -19,7 +19,6 @@ export default function AdminPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [products, setProducts] = useState<Product[]>([]);
-  const [requests, setRequests] = useState<ProductRequest[]>([]);
   const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -39,18 +38,6 @@ export default function AdminPage() {
 
     loadProducts();
 
-    async function loadRequests() {
-      try {
-        const response = await fetch('/api/product-requests', { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Kon aanvragen niet laden.');
-        setRequests(data.requests ?? []);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : 'Kon aanvragen niet laden.');
-      }
-    }
-
-    loadRequests();
   }, []);
 
   function resetForm() {
@@ -188,36 +175,6 @@ export default function AdminPage() {
     }
   }
 
-  async function handleDeleteRequest(id: string) {
-    try {
-      const response = await fetch('/api/product-requests', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Aanvraag verwijderen mislukt.');
-      setRequests((current) => current.filter((request) => request.id !== id));
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Aanvraag verwijderen mislukt.');
-    }
-  }
-
-  async function handleRequestStatusChange(id: string, status: ProductRequestStatus) {
-    try {
-      const response = await fetch('/api/product-requests', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, status })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Status opslaan mislukt.');
-      setRequests((current) => current.map((request) => request.id === id ? data.request : request));
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Status opslaan mislukt.');
-    }
-  }
-
   function logout() {
     clearAdminAuthCookie();
     router.push('/admin/login');
@@ -290,37 +247,6 @@ export default function AdminPage() {
 
       <PageManager />
 
-      <section className="table-card">
-        <h2>Productaanvragen</h2>
-        {requests.length === 0 ? <p>Er zijn nog geen aanvragen.</p> : (
-          <div className="grid grid-2">
-            {requests.map((request) => (
-              <article key={request.id} className="card">
-                <h3>{request.product}</h3>
-                <p><strong>Naam:</strong> {request.name}</p>
-                <p><strong>E-mail:</strong> {request.email}</p>
-                {request.phone ? <p><strong>Telefoon:</strong> {request.phone}</p> : null}
-                <p><strong>Aantal:</strong> {request.quantity}</p>
-                {request.date ? <p><strong>Leverdatum:</strong> {request.date}</p> : null}
-                {request.message ? <p><strong>Bericht:</strong> {request.message}</p> : null}
-                {request.imageUrl ? <p><a href={request.imageUrl} target="_blank" rel="noreferrer">Afbeelding bekijken</a></p> : null}
-                <p><small>{new Date(request.createdAt).toLocaleString('nl-NL')}</small></p>
-                <label>Status
-                  <select
-                    value={request.status}
-                    onChange={(event) => handleRequestStatusChange(request.id, event.target.value as ProductRequestStatus)}
-                  >
-                    <option value="new">Nieuw</option>
-                    <option value="in_progress">In behandeling</option>
-                    <option value="completed">Afgerond</option>
-                  </select>
-                </label>
-                <button className="btn btn-secondary" onClick={() => handleDeleteRequest(request.id)}>Verwijderen</button>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
     </main>
   );
 }
