@@ -26,13 +26,10 @@ export default function HomePage() {
     <main className="container">
       <SiteHeader />
 
-      <section className="hero">
+      <section className="hero home-hero">
         <span className="badge">Premium print & design</span>
         <h1>Lakenvelder Design</h1>
         <p>Unieke en stijlvolle stickers, printwerk en visuele producten voor jouw merk. Van opvallende voertuigbestickering tot bedrukte T-shirts, mokken, stickers en reclameborden — altijd met topkwaliteit en scherpe prijzen.</p>
-        <div className="nav-links">
-          <a className="btn btn-primary" href="#prijzen">Bekijk prijzen</a>
-        </div>
       </section>
 
       <section id="prijzen" className="table-card">
