@@ -23,6 +23,7 @@ export default function SiteHeader() {
           <Link key={page.id} href={`/${page.slug}`}>{page.title}</Link>
         ))}
         <Link href="/product-aanvragen" className="btn btn-secondary">Product aanvragen</Link>
+        <Link href="/admin/login" className="btn btn-secondary">Admin login</Link>
       </div>
     </nav>
   );
