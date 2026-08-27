@@ -117,4 +117,10 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 
 /* Make the action row wrap nicely on small screens */
 .form-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.request-success { padding: 2rem 1rem; text-align: center; }
+.request-success-icon { display: grid; place-items: center; width: 3rem; height: 3rem; margin: 0 auto 1rem; border-radius: 50%; background: #dcfce7; color: #15803d; font-size: 1.5rem; font-weight: 800; }
+.request-success h2 { margin: 0 0 0.7rem; color: #166534; }
+.request-success p { margin: 0 auto 0.6rem; line-height: 1.6; color: #374151; }
+.request-success-note { color: #6b7280 !important; }
+.request-success .btn { margin-top: 1rem; }
 

@@ -76,8 +76,22 @@ export default function ProductRequestForm() {
     }
   }
 
+  function startNewRequest() {
+    setStatus("idle");
+    setServerMessage(null);
+  }
+
   return (
     <div className="form-card shadow-md">
+      {status === "success" ? (
+        <div className="request-success" role="status" aria-live="polite">
+          <div className="request-success-icon" aria-hidden="true">✓</div>
+          <h2>Aanvraag ontvangen</h2>
+          <p>{serverMessage}</p>
+          <p className="request-success-note">We nemen zo snel mogelijk contact met je op.</p>
+          <button type="button" className="btn btn-secondary" onClick={startNewRequest}>Nieuwe aanvraag</button>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} noValidate>
         <div className="mb-4">
           <label className="block font-medium mb-1">Naam *</label>
@@ -141,10 +155,10 @@ export default function ProductRequestForm() {
             {status === "sending" ? "Versturen..." : "Verstuur aanvraag"}
           </button>
 
-          {status === "success" && <p className="text-green-600">{serverMessage}</p>}
           {status === "error" && <p className="text-red-600">{serverMessage}</p>}
         </div>
       </form>
+      )}
     </div>
   );
 }
