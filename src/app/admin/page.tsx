@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
 import { Product, ProductInput } from '@/lib/types';
-import PageManager from './PageManager';
 import AdminNavigation from './AdminNavigation';
 import SiteHeader from '../SiteHeader';
 import Link from 'next/link';
@@ -260,7 +259,6 @@ export default function AdminPage() {
         </table>
       </section>
 
-      <PageManager />
       </div>
       </div>
     </main>
