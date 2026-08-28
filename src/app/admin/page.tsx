@@ -15,6 +15,11 @@ const initialForm: ProductInput = {
   imageUrl: ''
 };
 
+function formatPrice(price: string) {
+  const numericPrice = Number(price);
+  return price.trim() !== '' && Number.isFinite(numericPrice) ? `€${numericPrice.toFixed(2)}` : price;
+}
+
 export default function AdminPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
@@ -78,21 +83,15 @@ export default function AdminPage() {
     setError('');
     setMessage('');
 
-    if (!form.name.trim() || !form.description.trim() || !form.price || !form.imageUrl.trim()) {
+    if (!form.name.trim() || !form.description.trim() || !form.price.trim()) {
       setError('Vul alle velden in.');
-      return;
-    }
-
-    const price = Number(form.price);
-    if (Number.isNaN(price) || price <= 0) {
-      setError('Prijs moet een positief getal zijn.');
       return;
     }
 
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
-      price,
+      price: form.price.trim(),
       imageUrl: form.imageUrl.trim()
     };
 
@@ -231,8 +230,8 @@ export default function AdminPage() {
                   <strong>{product.name}</strong>
                   <div>{product.description}</div>
                 </td>
-                <td>€{product.price.toFixed(2)}</td>
-                <td><img src={product.imageUrl} alt={product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 12 }} /></td>
+                <td>{formatPrice(product.price)}</td>
+                <td>{product.imageUrl ? <img src={product.imageUrl} alt={product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 12 }} /> : 'Geen afbeelding'}</td>
                 <td>
                   <div className="nav-links">
                     <button className="btn btn-secondary" onClick={() => startEdit(product)}>Bewerken</button>

@@ -62,11 +62,13 @@ async function ensureProductsTable() {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       description TEXT NOT NULL,
-      price DOUBLE PRECISION NOT NULL,
+      price TEXT NOT NULL,
       image_url TEXT NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `;
+
+  await sql`ALTER TABLE products ALTER COLUMN price TYPE TEXT USING price::text;`;
 }
 
 async function seedInitialProducts() {
@@ -109,7 +111,7 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       id: crypto.randomUUID(),
       name: input.name.trim(),
       description: input.description.trim(),
-      price: Number(input.price),
+      price: input.price.trim(),
       imageUrl: input.imageUrl.trim(),
       createdAt: new Date().toISOString()
     };
@@ -127,7 +129,7 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       id: crypto.randomUUID(),
       name: input.name.trim(),
       description: input.description.trim(),
-      price: Number(input.price),
+      price: input.price.trim(),
       imageUrl: input.imageUrl.trim(),
       createdAt: new Date().toISOString()
     };
@@ -144,7 +146,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
       id,
       name: input.name.trim(),
       description: input.description.trim(),
-      price: Number(input.price),
+      price: input.price.trim(),
       imageUrl: input.imageUrl.trim(),
       createdAt: new Date().toISOString()
     };
@@ -168,7 +170,7 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
       ...products[index],
       name: input.name.trim(),
       description: input.description.trim(),
-      price: Number(input.price),
+      price: input.price.trim(),
       imageUrl: input.imageUrl.trim()
     };
 

@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react';
 import { Product } from '@/lib/types';
 import SiteHeader from './SiteHeader';
 
+function formatPrice(price: string) {
+  const numericPrice = Number(price);
+  return price.trim() !== '' && Number.isFinite(numericPrice) ? `€${numericPrice.toFixed(2)}` : price;
+}
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -38,12 +43,12 @@ export default function HomePage() {
         <div className="grid grid-3">
           {products.map((product) => (
             <article key={product.id} className="card">
-              <div style={{ marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 18, background: '#f3f4f6' }}>
+              {product.imageUrl ? <div style={{ marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 18, background: '#f3f4f6' }}>
                 <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: 260, objectFit: 'contain', display: 'block' }} />
-              </div>
+              </div> : null}
               <h3>{product.name}</h3>
               <p>{product.description}</p>
-              <strong>€{product.price.toFixed(2)}</strong>
+              <strong>{formatPrice(product.price)}</strong>
             </article>
           ))}
         </div>
