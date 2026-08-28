@@ -15,9 +15,10 @@ const initialForm: ProductInput = {
   imageUrl: ''
 };
 
-function formatPrice(price: string) {
-  const numericPrice = Number(price);
-  return price.trim() !== '' && Number.isFinite(numericPrice) ? `€${numericPrice.toFixed(2)}` : price;
+function formatPrice(price: string | number | null | undefined) {
+  const textPrice = String(price ?? '').trim();
+  const numericPrice = Number(textPrice);
+  return textPrice !== '' && Number.isFinite(numericPrice) ? `€${numericPrice.toFixed(2)}` : textPrice;
 }
 
 export default function AdminPage() {
