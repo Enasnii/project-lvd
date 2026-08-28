@@ -9,7 +9,6 @@ export default function SiteHeader() {
   const pathname = usePathname();
   const [pages, setPages] = useState<SitePage[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeHash, setActiveHash] = useState('');
 
   useEffect(() => {
     fetch('/api/pages', { cache: 'no-store' })
@@ -18,19 +17,9 @@ export default function SiteHeader() {
       .catch(() => setPages([]));
   }, []);
 
-  useEffect(() => {
-    function updateHash() { setActiveHash(window.location.hash); }
-    updateHash();
-    window.addEventListener('hashchange', updateHash);
-    return () => window.removeEventListener('hashchange', updateHash);
-  }, []);
-
   useEffect(() => { setIsMenuOpen(false); }, [pathname]);
 
-  const contactPage = pages.find((page) => page.published && page.showInMenu && (page.slug === 'contact' || page.title.toLowerCase() === 'contact'));
-  const contactHref = contactPage ? `/${contactPage.slug}` : '/product-aanvragen';
-  const isHomeActive = pathname === '/' && activeHash !== '#prijzen';
-  const isProductsActive = pathname === '/' && activeHash === '#prijzen';
+  const isHomeActive = pathname === '/';
 
   return (
     <header className="site-header">
@@ -48,10 +37,8 @@ export default function SiteHeader() {
       <div id="site-navigation" className={isMenuOpen ? 'site-nav-links is-open' : 'site-nav-links'}>
         <div className="site-nav-main">
           <Link className={isHomeActive ? 'nav-item active' : 'nav-item'} href="/">Home</Link>
-          <Link className={isProductsActive ? 'nav-item active' : 'nav-item'} href="/#prijzen">Producten / Prijslijst</Link>
           <Link className={pathname.startsWith('/portfolio') ? 'nav-item active' : 'nav-item'} href="/portfolio">Portfolio</Link>
-          <Link className={pathname === contactHref ? 'nav-item active' : 'nav-item'} href={contactHref}>Contact</Link>
-          {pages.filter((page) => page.published && page.showInMenu && page.slug !== 'contact' && page.title.toLowerCase() !== 'contact').map((page) => (
+          {pages.filter((page) => page.published && page.showInMenu).map((page) => (
             <Link className={pathname === `/${page.slug}` ? 'nav-item active' : 'nav-item'} key={page.id} href={`/${page.slug}`}>{page.title}</Link>
           ))}
         </div>
