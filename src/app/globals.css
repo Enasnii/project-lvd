@@ -86,7 +86,8 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 .nav-item.active::after { transform: scaleX(1); }
 .admin-link { padding: 0.65rem 0.7rem; color: #6b7280; }
 .admin-link:hover { color: #111827; }
-.admin-link { font-size: 0.8rem; }
+.admin-link { display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; padding: 0; border-radius: 10px; font-size: 1rem; line-height: 1; transition: color 160ms ease, background 160ms ease, transform 160ms ease; }
+.admin-link:hover { background: rgba(224,231,255,0.65); transform: translateY(-1px); }
 .site-nav-actions { gap: 0.7rem; padding-left: 0.9rem; border-left: 1px solid #d1d5db; }
 .site-nav-actions .btn { padding: 0.75rem 1.05rem; border-radius: 11px; font-size: 0.86rem; }
 .quote-cta { display: inline-flex; align-items: center; gap: 0.45rem; box-shadow: 0 8px 16px rgba(79,70,229,0.18); transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease; }

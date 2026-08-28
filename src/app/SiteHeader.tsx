@@ -43,7 +43,7 @@ export default function SiteHeader() {
           ))}
         </div>
         <div className="site-nav-actions">
-          <Link href="/admin/login" className="admin-link">Admin</Link>
+          <Link href="/admin/login" className="admin-link" aria-label="Admin login" title="Admin login"><span aria-hidden="true">⚙</span></Link>
           <Link href="/product-aanvragen" className="btn btn-primary quote-cta">Offerte aanvragen <span aria-hidden="true">&rarr;</span></Link>
         </div>
       </div>
