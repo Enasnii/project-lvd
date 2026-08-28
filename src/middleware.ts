@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { cookieName, verifyAdminSessionToken } from './lib/admin-session';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAdminRoute = pathname.startsWith('/admin');
   const isAdminLoginRoute = pathname === '/admin/login';
-  const isAuthenticated = request.cookies.get('sticker-admin-auth')?.value === 'true';
+  const isAuthenticated = await verifyAdminSessionToken(request.cookies.get(cookieName)?.value);
 
   if (isAdminRoute && !isAdminLoginRoute && !isAuthenticated) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+    const loginUrl = new URL('/admin/login', request.url);
+    loginUrl.searchParams.set('returnTo', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAdminLoginRoute && isAuthenticated) {

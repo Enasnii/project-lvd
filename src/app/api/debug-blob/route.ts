@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { isAdminAuthenticated } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
+  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: 'Niet ingelogd.' }, { status: 401 });
   try {
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       return NextResponse.json({ ok: false, error: 'BLOB_READ_WRITE_TOKEN not set' }, { status: 400 });

@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { setAdminAuthCookie } from '@/lib/auth';
+import { authenticateAdmin } from '@/lib/auth';
 import SiteHeader from '../../SiteHeader';
 
 export default function AdminLoginPage() {
@@ -15,16 +15,14 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
 
-    const validUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin';
-    const validPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'Gurbetabe123';
-
-    if (username.trim() !== validUsername || password.trim() !== validPassword) {
+    if (!(await authenticateAdmin(username, password))) {
       setError('Onjuiste inloggegevens.');
       return;
     }
 
-    await setAdminAuthCookie();
-    router.push('/admin');
+    const requestedPath = new URLSearchParams(window.location.search).get('returnTo');
+    const destination = requestedPath?.startsWith('/admin/') || requestedPath === '/admin' ? requestedPath : '/admin';
+    router.push(destination);
   }
 
   return (
