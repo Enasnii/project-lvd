@@ -54,7 +54,7 @@ export type SitePageInput = {
   menuOrder: number;
 };
 
-export type PortfolioCategory = 'stickers' | 'autobelettering' | 'car-wrapping' | 'kleding' | 'reclameborden' | 'banners' | 'etiketten' | 'overig';
+export type PortfolioCategory = 'stickers' | 'autobelettering' | 'car-wrapping' | 'kleding' | 'reclameborden' | 'banners' | 'etiketten' | 'tegeltjes' | 'mokken-bidons-tumblers' | 'overig';
 
 export type PortfolioImage = {
   id: string;

@@ -6,18 +6,24 @@ import { PortfolioCategory, PortfolioProjectInput } from '@/lib/types';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const categories: PortfolioCategory[] = ['stickers', 'autobelettering', 'car-wrapping', 'kleding', 'reclameborden', 'banners', 'etiketten', 'overig'];
+const categories: PortfolioCategory[] = ['stickers', 'autobelettering', 'kleding', 'reclameborden', 'banners', 'etiketten', 'tegeltjes', 'mokken-bidons-tumblers', 'overig'];
+const validCategories: PortfolioCategory[] = [...categories, 'car-wrapping'];
+
+function slugify(value: string) {
+  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 
 function parseInput(value: unknown): PortfolioProjectInput {
   const input = value as Partial<PortfolioProjectInput>;
-  const slug = String(input.slug ?? '').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
+  const slug = slugify(String(input.slug ?? '').trim());
   const category = String(input.category ?? '') as PortfolioCategory;
   const images = Array.isArray(input.images) ? input.images.filter((image) => image && typeof image.id === 'string' && typeof image.url === 'string') : [];
-  if (!String(input.title ?? '').trim() || !slug || !String(input.description ?? '').trim() || !String(input.date ?? '').trim() || !images.length) {
-    throw new Error('Titel, slug, beschrijving, datum en minimaal één foto zijn verplicht.');
+  if (!String(input.title ?? '').trim() || !String(input.description ?? '').trim() || !String(input.date ?? '').trim() || !images.length) {
+    throw new Error('Titel, beschrijving, datum en minimaal één foto zijn verplicht.');
   }
+  if (!slug) throw new Error('De titel moet letters of cijfers bevatten zodat een URL gemaakt kan worden.');
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) throw new Error('Gebruik voor de slug alleen letters, cijfers en koppeltekens.');
-  if (!categories.includes(category)) throw new Error('Kies een geldige categorie.');
+  if (!validCategories.includes(category)) throw new Error('Kies een geldige categorie.');
   return {
     title: String(input.title).trim(), slug, category, description: String(input.description).trim(), images,
     published: input.published === true, featured: input.featured === true, date: String(input.date).trim(),

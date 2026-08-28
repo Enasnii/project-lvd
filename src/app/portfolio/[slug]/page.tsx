@@ -5,7 +5,7 @@ import SiteHeader from '../../SiteHeader';
 import { getPortfolioProjectBySlug } from '@/lib/portfolio-store';
 import { PortfolioCategory } from '@/lib/types';
 
-const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', overig: 'Overig' };
+const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', tegeltjes: 'Tegeltjes', 'mokken-bidons-tumblers': 'Mokken / Bidons / Tumblers', overig: 'Overig' };
 
 type Props = { params: { slug: string } };
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { PortfolioCategory, PortfolioImage, PortfolioProject, PortfolioProjectInput } from '@/lib/types';
 
-const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', overig: 'Overig' };
+const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', tegeltjes: 'Tegeltjes', 'mokken-bidons-tumblers': 'Mokken / Bidons / Tumblers', overig: 'Overig' };
 const categories = Object.keys(categoryLabels) as PortfolioCategory[];
 
 function slugify(value: string) {
@@ -18,7 +18,6 @@ export default function PortfolioManager() {
   const [projects, setProjects] = useState<PortfolioProject[]>([]);
   const [form, setForm] = useState<PortfolioProjectInput>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [slugTouched, setSlugTouched] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -33,10 +32,10 @@ export default function PortfolioManager() {
     }).catch((loadError) => setError(loadError instanceof Error ? loadError.message : 'Portfolio kon niet worden geladen.')).finally(() => setIsLoading(false));
   }, []);
 
-  function reset() { setForm(emptyForm()); setEditingId(null); setSlugTouched(false); }
+  function reset() { setForm(emptyForm()); setEditingId(null); }
 
   function updateTitle(title: string) {
-    setForm((current) => ({ ...current, title, slug: slugTouched ? current.slug : slugify(title) }));
+    setForm((current) => ({ ...current, title, slug: editingId ? current.slug : slugify(title) }));
   }
 
   async function uploadFiles(event: React.ChangeEvent<HTMLInputElement>) {
@@ -68,7 +67,7 @@ export default function PortfolioManager() {
   }
 
   function editProject(project: PortfolioProject) {
-    setEditingId(project.id); setSlugTouched(true);
+    setEditingId(project.id);
     setForm({ title: project.title, slug: project.slug, category: project.category, description: project.description, images: project.images, published: project.published, featured: project.featured, date: project.date, order: project.order });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -96,12 +95,12 @@ export default function PortfolioManager() {
     <section className="hero admin-page-intro"><span className="badge">Beheeromgeving</span><h1>Portfolio</h1><p>Beheer projecten, publicatie en projectfoto's vanuit één overzicht.</p></section>
     <section className="table-card portfolio-admin-form"><div className="section-heading"><div><h2>{editingId ? 'Project bewerken' : 'Nieuw project'}</h2><p>De eerste foto wordt automatisch de hoofdafbeelding.</p></div></div>
       <form onSubmit={saveProject} className="form-grid">
-        <div className="grid grid-2"><label>Titel<input value={form.title} onChange={(event) => updateTitle(event.target.value)} required /></label><label>Slug<input value={form.slug} onChange={(event) => { setSlugTouched(true); setForm((current) => ({ ...current, slug: slugify(event.target.value) })); }} required /></label></div>
-        <div className="grid grid-3"><label>Categorie<select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as PortfolioCategory }))}>{categories.map((category) => <option value={category} key={category}>{categoryLabels[category]}</option>)}</select></label><label>Datum<input type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} required /></label><label>Volgorde<input type="number" min="0" value={form.order} onChange={(event) => setForm((current) => ({ ...current, order: Number(event.target.value) }))} /></label></div>
+        <label>Titel<input value={form.title} onChange={(event) => updateTitle(event.target.value)} required /></label>
+        <div className="grid grid-3"><label>Categorie<select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as PortfolioCategory }))}>{categories.filter((category) => category !== 'car-wrapping').map((category) => <option value={category} key={category}>{categoryLabels[category]}</option>)}</select></label><label>Datum<input type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} required /></label><label>Volgorde<input type="number" min="0" value={form.order} onChange={(event) => setForm((current) => ({ ...current, order: Number(event.target.value) }))} /></label></div>
         <label>Beschrijving<textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} rows={6} required /></label>
         <label>Foto's toevoegen<input type="file" accept="image/*" multiple onChange={uploadFiles} disabled={isUploading} /></label>
         {form.images.length ? <div className="portfolio-upload-grid" aria-label="Projectfoto's">{form.images.map((image, index) => <div className="portfolio-upload-item" key={image.id} draggable onDragStart={() => setDraggedIndex(index)} onDragOver={(event) => event.preventDefault()} onDrop={() => moveImage(index)}><img src={image.url} alt={`Preview ${index + 1}`} /><span>{index === 0 ? 'Hoofdafbeelding' : `Foto ${index + 1}`}</span><button type="button" className="btn btn-secondary" onClick={() => removeImage(image.id)}>Verwijderen</button></div>)}</div> : <p className="portfolio-upload-empty">Nog geen foto's toegevoegd.</p>}
-        <div className="checkboxes"><label><input type="checkbox" checked={form.published} onChange={(event) => setForm((current) => ({ ...current, published: event.target.checked }))} /> Gepubliceerd</label><label><input type="checkbox" checked={form.featured} onChange={(event) => setForm((current) => ({ ...current, featured: event.target.checked }))} /> Uitgelicht</label></div>
+        <div className="checkboxes"><label><input type="checkbox" checked={form.published} onChange={(event) => setForm((current) => ({ ...current, published: event.target.checked }))} /> Gepubliceerd</label><label><input type="checkbox" checked={form.featured} onChange={(event) => setForm((current) => ({ ...current, featured: event.target.checked }))} /> Uitgelicht <small className="field-help">Markeer dit project als uitgelicht. Uitgelichte projecten kunnen extra prominent worden weergegeven op de portfolio-pagina.</small></label></div>
         <div className="nav-links"><button className="btn btn-primary" type="submit" disabled={isUploading}>{editingId ? 'Project opslaan' : 'Project toevoegen'}</button>{editingId ? <button className="btn btn-secondary" type="button" onClick={reset}>Annuleren</button> : null}</div>
       </form>
       {error ? <p className="error">{error}</p> : null}{message ? <p className="success">{message}</p> : null}

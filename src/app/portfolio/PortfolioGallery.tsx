@@ -4,13 +4,13 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { PortfolioCategory, PortfolioProject } from '@/lib/types';
 
-type PortfolioFilter = 'alles' | 'stickers' | 'auto' | 'kleding' | 'reclame' | 'overig';
+type PortfolioFilter = 'alles' | 'stickers' | 'auto' | 'kleding' | 'reclame' | 'tegeltjes' | 'mokken' | 'overig';
 const filters: { value: PortfolioFilter; label: string }[] = [
   { value: 'alles', label: 'Alles' }, { value: 'stickers', label: 'Stickers' }, { value: 'auto', label: 'Auto' },
-  { value: 'kleding', label: 'Kleding' }, { value: 'reclame', label: 'Reclame' }, { value: 'overig', label: 'Overig' }
+  { value: 'kleding', label: 'Kleding' }, { value: 'reclame', label: 'Reclame' }, { value: 'tegeltjes', label: 'Tegeltjes' }, { value: 'mokken', label: 'Mokken / Bidons / Tumblers' }, { value: 'overig', label: 'Overig' }
 ];
-const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', overig: 'Overig' };
-const filterCategories: Record<Exclude<PortfolioFilter, 'alles'>, PortfolioCategory[]> = { stickers: ['stickers'], auto: ['autobelettering', 'car-wrapping'], kleding: ['kleding'], reclame: ['reclameborden', 'banners', 'etiketten'], overig: ['overig'] };
+const categoryLabels: Record<PortfolioCategory, string> = { stickers: 'Stickers', autobelettering: 'Autobelettering', 'car-wrapping': 'Car wrapping', kleding: 'T-shirts & kleding', reclameborden: 'Reclameborden', banners: 'Banners', etiketten: 'Etiketten', tegeltjes: 'Tegeltjes', 'mokken-bidons-tumblers': 'Mokken / Bidons / Tumblers', overig: 'Overig' };
+const filterCategories: Record<Exclude<PortfolioFilter, 'alles'>, PortfolioCategory[]> = { stickers: ['stickers'], auto: ['autobelettering', 'car-wrapping'], kleding: ['kleding'], reclame: ['reclameborden', 'banners', 'etiketten'], tegeltjes: ['tegeltjes'], mokken: ['mokken-bidons-tumblers'], overig: ['overig'] };
 
 export default function PortfolioGallery({ projects }: { projects: PortfolioProject[] }) {
   const [filter, setFilter] = useState<PortfolioFilter>('alles');
