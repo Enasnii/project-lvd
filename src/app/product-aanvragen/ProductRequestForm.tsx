@@ -149,10 +149,11 @@ export default function ProductRequestForm() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-60"
+            className="request-submit-button"
             disabled={status === "sending"}
           >
-            {status === "sending" ? "Versturen..." : "Verstuur aanvraag"}
+            <span>{status === "sending" ? "Versturen..." : "Verstuur aanvraag"}</span>
+            {status !== "sending" ? <span className="request-submit-arrow" aria-hidden="true">→</span> : null}
           </button>
 
           {status === "error" && <p className="text-red-600">{serverMessage}</p>}

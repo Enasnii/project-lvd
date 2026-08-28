@@ -140,6 +140,35 @@ nav { display: flex; justify-content: space-between; align-items: center; paddin
 
 /* Make the action row wrap nicely on small screens */
 .form-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.request-submit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  min-width: 12rem;
+  padding: 0.85rem 1.15rem;
+  border: 1px solid #111827;
+  border-radius: 12px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+}
+.request-submit-button:hover:not(:disabled) {
+  background: #374151;
+  border-color: #374151;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.16);
+  transform: translateY(-1px);
+}
+.request-submit-button:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.3);
+  outline-offset: 3px;
+}
+.request-submit-button:disabled { cursor: wait; opacity: 0.65; }
+.request-submit-arrow { font-size: 1.15rem; line-height: 1; transition: transform 160ms ease; }
+.request-submit-button:hover:not(:disabled) .request-submit-arrow { transform: translateX(3px); }
 .request-success { padding: 2rem 1rem; text-align: center; }
 .request-success-icon { display: grid; place-items: center; width: 3rem; height: 3rem; margin: 0 auto 1rem; border-radius: 50%; background: #dcfce7; color: #15803d; font-size: 1.5rem; font-weight: 800; }
 .request-success h2 { margin: 0 0 0.7rem; color: #166534; }
