@@ -183,7 +183,28 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
 export async function deleteProduct(id: string): Promise<void> {
   try {
     await ensureProductsTable();
-    await sql`DELETE FROM products WHERE id = ${id};`;
+    const result = await sql`DELETE FROM products WHERE id = ${id};`;
+
+    if (result.rowCount === 0) {
+      const products = await readFallbackProducts();
+      const filtered = products.filter((product) => product.id !== id);
+      if (filtered.length === products.length) {
+        throw new Error('Product niet gevonden.');
+      }
+      await writeFallbackProducts(filtered);
+      return;
+    }
+
+    // Keep fallback storage in sync when reads temporarily use it.
+    try {
+      const products = await readFallbackProducts();
+      const filtered = products.filter((product) => product.id !== id);
+      if (filtered.length !== products.length) {
+        await writeFallbackProducts(filtered);
+      }
+    } catch (fallbackError) {
+      console.warn('Fallback product cleanup failed after database delete.', fallbackError);
+    }
   } catch (error) {
     console.warn('Product delete failed, using fallback storage.', error);
     const products = await readFallbackProducts();
