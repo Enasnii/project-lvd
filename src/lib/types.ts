@@ -53,3 +53,27 @@ export type SitePageInput = {
   showInMenu: boolean;
   menuOrder: number;
 };
+
+export type PortfolioCategory = 'stickers' | 'autobelettering' | 'car-wrapping' | 'kleding' | 'reclameborden' | 'banners' | 'etiketten' | 'overig';
+
+export type PortfolioImage = {
+  id: string;
+  url: string;
+};
+
+export type PortfolioProject = {
+  id: string;
+  title: string;
+  slug: string;
+  category: PortfolioCategory;
+  description: string;
+  images: PortfolioImage[];
+  published: boolean;
+  featured: boolean;
+  date: string;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PortfolioProjectInput = Omit<PortfolioProject, 'id' | 'createdAt' | 'updatedAt'>;

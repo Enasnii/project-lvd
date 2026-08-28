@@ -24,7 +24,8 @@ export default function SiteHeader() {
       </Link>
       <div className="nav-links site-nav-links">
         <div className="site-nav-main">
-          <Link href="/#prijzen">Prijslijst</Link>
+          <Link href="/#prijzen">Home</Link>
+          <Link href="/portfolio">Portfolio</Link>
         {pages.filter((page) => page.published && page.showInMenu).map((page) => (
           <Link key={page.id} href={`/${page.slug}`}>{page.title}</Link>
         ))}

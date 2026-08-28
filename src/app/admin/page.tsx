@@ -184,7 +184,7 @@ export default function AdminPage() {
     <main className="container" style={{ paddingBottom: '3rem' }}>
       <SiteHeader />
       <div className="admin-toolbar">
-        <div><span>Beheeromgeving</span><Link href="/admin/product-aanvragen" className="admin-toolbar-link">Productaanvragen</Link></div>
+        <div><span>Beheeromgeving</span><Link href="/admin/portfolio" className="admin-toolbar-link">Portfolio</Link><Link href="/admin/product-aanvragen" className="admin-toolbar-link">Productaanvragen</Link></div>
         <button className="btn btn-secondary" onClick={logout}>Uitloggen</button>
       </div>
 
