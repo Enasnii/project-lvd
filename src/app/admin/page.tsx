@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { clearAdminAuthCookie } from '@/lib/auth';
 import { Product, ProductInput } from '@/lib/types';
 import PageManager from './PageManager';
+import AdminNavigation from './AdminNavigation';
 import SiteHeader from '../SiteHeader';
 import Link from 'next/link';
 
@@ -25,6 +26,8 @@ export default function AdminPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [products, setProducts] = useState<Product[]>([]);
+  const [portfolioCount, setPortfolioCount] = useState(0);
+  const [newRequestCount, setNewRequestCount] = useState(0);
   const [message, setMessage] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -43,6 +46,14 @@ export default function AdminPage() {
     }
 
     loadProducts();
+    fetch('/api/product-requests', { cache: 'no-store' })
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => setNewRequestCount((data?.requests ?? []).filter((request: { status: string }) => request.status === 'new').length))
+      .catch(() => setNewRequestCount(0));
+    fetch('/api/portfolio', { cache: 'no-store' })
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => setPortfolioCount((data?.projects ?? []).length))
+      .catch(() => setPortfolioCount(0));
 
   }, []);
 
@@ -183,10 +194,14 @@ export default function AdminPage() {
   return (
     <main className="container" style={{ paddingBottom: '3rem' }}>
       <SiteHeader />
-      <div className="admin-toolbar">
-        <div><span>Beheeromgeving</span><Link href="/admin/portfolio" className="admin-toolbar-link">Portfolio</Link><Link href="/admin/product-aanvragen" className="admin-toolbar-link">Productaanvragen</Link></div>
-        <button className="btn btn-secondary" onClick={logout}>Uitloggen</button>
-      </div>
+      <div className="admin-layout">
+      <AdminNavigation />
+      <div className="admin-content">
+      <div className="admin-content-header"><div><span className="admin-eyebrow">Beheeromgeving</span><h1>Welkom terug</h1><p>Beheer hier de inhoud en aanvragen van Lakenvelder Design.</p></div><button className="btn btn-secondary" onClick={logout}>Uitloggen</button></div>
+      <section className="admin-overview-grid">
+        <Link className="admin-overview-card" href="/admin/portfolio"><span className="admin-overview-icon">▧</span><span><strong>Portfolio</strong><small>{portfolioCount} {portfolioCount === 1 ? 'project' : 'projecten'} in beheer</small></span><span className="admin-card-arrow">&rarr;</span></Link>
+        <Link className="admin-overview-card" href="/admin/product-aanvragen"><span className="admin-overview-icon">▤</span><span><strong>Productaanvragen</strong><small>{newRequestCount} nieuwe {newRequestCount === 1 ? 'aanvraag' : 'aanvragen'}</small></span><span className="admin-card-arrow">&rarr;</span></Link>
+      </section>
 
       <section className="hero">
         <h1>Producten beheren</h1>
@@ -246,7 +261,8 @@ export default function AdminPage() {
       </section>
 
       <PageManager />
-
+      </div>
+      </div>
     </main>
   );
 }

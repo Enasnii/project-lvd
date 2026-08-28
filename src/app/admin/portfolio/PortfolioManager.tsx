@@ -93,7 +93,7 @@ export default function PortfolioManager() {
 
   return <>
     <section className="hero admin-page-intro"><span className="badge">Beheeromgeving</span><h1>Portfolio</h1><p>Beheer projecten, publicatie en projectfoto's vanuit één overzicht.</p></section>
-    <section className="table-card portfolio-admin-form"><div className="section-heading"><div><h2>{editingId ? 'Project bewerken' : 'Nieuw project'}</h2><p>De eerste foto wordt automatisch de hoofdafbeelding.</p></div></div>
+    <section id="portfolio-form" className="table-card portfolio-admin-form"><div className="section-heading"><div><h2>{editingId ? 'Project bewerken' : 'Nieuw project'}</h2><p>De eerste foto wordt automatisch de hoofdafbeelding.</p></div></div>
       <form onSubmit={saveProject} className="form-grid">
         <label>Titel<input value={form.title} onChange={(event) => updateTitle(event.target.value)} required /></label>
         <div className="grid grid-3"><label>Categorie<select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as PortfolioCategory }))}>{categories.filter((category) => category !== 'car-wrapping').map((category) => <option value={category} key={category}>{categoryLabels[category]}</option>)}</select></label><label>Datum<input type="date" value={form.date} onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))} required /></label><label>Volgorde<input type="number" min="0" value={form.order} onChange={(event) => setForm((current) => ({ ...current, order: Number(event.target.value) }))} /></label></div>

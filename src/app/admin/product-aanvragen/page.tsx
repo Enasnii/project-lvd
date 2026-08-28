@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import SiteHeader from '../../SiteHeader';
 import { ProductRequest, ProductRequestStatus } from '@/lib/types';
+import AdminNavigation from '../AdminNavigation';
 
 const statusLabels: Record<ProductRequestStatus, string> = {
   new: 'Nieuw',
@@ -81,8 +82,8 @@ export default function ProductRequestsPage() {
   return (
     <main className="container admin-page-shell">
       <SiteHeader />
-      <div className="admin-toolbar"><div><Link href="/admin">← Terug naar dashboard</Link><span className="admin-toolbar-label">Aanvragen</span></div></div>
-      <section className="hero admin-page-intro"><span className="badge">Beheeromgeving</span><h1>Productaanvragen</h1><p>Beheer nieuwe aanvragen en bewaar afgeronde aanvragen overzichtelijk in het archief.</p></section>
+      <div className="admin-layout"><AdminNavigation /><div className="admin-content">
+      <div className="admin-content-header"><div><span className="admin-eyebrow">Beheeromgeving / Aanvragen</span><h1>Productaanvragen</h1><p>Bekijk en beheer aanvragen die via de website zijn binnengekomen.</p></div></div>
       {error ? <p className="error">{error}</p> : null}
       {isLoading ? <p>Bezig met laden...</p> : null}
       {!isLoading ? <>
@@ -93,6 +94,7 @@ export default function ProductRequestsPage() {
           {archivedRequests.length ? <div className="grid grid-2">{archivedRequests.map(renderRequest)}</div> : <p>Het archief is nog leeg.</p>}
         </section>
       </> : null}
+      </div></div>
     </main>
   );
 }
