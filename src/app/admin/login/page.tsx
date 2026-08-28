@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { setAdminAuthCookie } from '@/lib/auth';
 import SiteHeader from '../../SiteHeader';
 
 export default function AdminLoginPage() {
@@ -14,21 +15,16 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
 
-    try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Inloggen mislukt.');
+    const validUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin';
+    const validPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'Gurbetabe123';
 
-      const requestedPath = new URLSearchParams(window.location.search).get('returnTo');
-      const destination = requestedPath?.startsWith('/admin/') || requestedPath === '/admin' ? requestedPath : '/admin';
-      router.push(destination);
-    } catch (loginError) {
-      setError(loginError instanceof Error ? loginError.message : 'Inloggen mislukt.');
+    if (username.trim() !== validUsername || password.trim() !== validPassword) {
+      setError('Onjuiste inloggegevens.');
+      return;
     }
+
+    await setAdminAuthCookie();
+    router.push('/admin');
   }
 
   return (

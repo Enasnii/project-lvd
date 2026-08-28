@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { isAdminAuthenticated } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
-  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: 'Niet ingelogd.' }, { status: 401 });
   try {
     const { put } = await import('@vercel/blob');
     const key = `debug/test-${Date.now()}.json`;

@@ -1,7 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminAuthenticated } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
@@ -36,7 +35,6 @@ async function uploadToBlob(file: File) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: 'Niet ingelogd.' }, { status: 401 });
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;

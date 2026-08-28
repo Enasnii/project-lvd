@@ -1,24 +1,19 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { cookieName, createAdminSessionToken, sessionLifetimeSeconds, verifyAdminSessionToken } from './admin-session';
 
-export async function authenticateAdmin(username: string, password: string) {
-  const validUsername = process.env.ADMIN_USERNAME || process.env.NEXT_PUBLIC_ADMIN_USERNAME;
-  const validPassword = process.env.ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-  if (!validUsername || !validPassword || username.trim() !== validUsername || password.trim() !== validPassword) return false;
-  cookies().set(cookieName, await createAdminSessionToken(), {
+export async function setAdminAuthCookie() {
+  cookies().set('sticker-admin-auth', 'true', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: sessionLifetimeSeconds
+    maxAge: 60 * 60 * 8
   });
-  return true;
 }
 
 export async function clearAdminAuthCookie() {
-  cookies().set(cookieName, '', {
+  cookies().set('sticker-admin-auth', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
@@ -28,5 +23,5 @@ export async function clearAdminAuthCookie() {
 }
 
 export async function isAdminAuthenticated() {
-  return verifyAdminSessionToken(cookies().get(cookieName)?.value);
+  return cookies().get('sticker-admin-auth')?.value === 'true';
 }

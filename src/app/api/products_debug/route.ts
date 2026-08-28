@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createProduct, getProducts } from '@/lib/data';
-import { isAdminAuthenticated } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
-  if (!(await isAdminAuthenticated())) return NextResponse.json({ error: 'Niet ingelogd.' }, { status: 401 });
   try {
     const input = await request.json();
     const product = await createProduct(input);
