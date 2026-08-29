@@ -1,43 +1,15 @@
-import { promises as fs } from 'fs';
-import path from 'path';
-import { list, put } from '@vercel/blob';
+import { readJsonFile, writeJsonFile } from './local-storage';
 import { SitePage, SitePageInput } from './types';
 
-const blobStoragePath = 'data/site-pages.json';
-const fallbackStoragePath = process.env.PAGES_STORAGE_FILE ?? path.join('/tmp', 'site-pages.json');
+const storagePath = 'data/site-pages.json';
 
 async function readPages(): Promise<SitePage[]> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const result = await list({ prefix: blobStoragePath, limit: 1 });
-    const blob = result.blobs.find((item) => item.pathname === blobStoragePath);
-    if (!blob) return [];
-    const response = await fetch(`${blob.url}?cacheBust=${Date.now()}`, { cache: 'no-store' });
-    if (!response.ok) throw new Error('Pagina\'s konden niet worden gelezen.');
-    const parsed = await response.json();
-    return Array.isArray(parsed) ? parsed : [];
-  }
-
-  try {
-    const file = await fs.readFile(fallbackStoragePath, 'utf8');
-    const parsed = JSON.parse(file);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const parsed = await readJsonFile(storagePath, []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 async function writePages(pages: SitePage[]) {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    await put(blobStoragePath, JSON.stringify(pages, null, 2), {
-      access: 'public',
-      addRandomSuffix: false,
-      contentType: 'application/json'
-    });
-    return;
-  }
-
-  await fs.mkdir(path.dirname(fallbackStoragePath), { recursive: true });
-  await fs.writeFile(fallbackStoragePath, JSON.stringify(pages, null, 2), 'utf8');
+  await writeJsonFile(storagePath, pages);
 }
 
 function sortPages(pages: SitePage[]) {

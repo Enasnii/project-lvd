@@ -1,40 +1,19 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { sql } from '@vercel/postgres';
 import { Product, ProductInput } from './types';
+import { readJsonFile, writeJsonFile } from './local-storage';
+import { initDatabase, runSql } from './db';
 
 const initialProducts: Product[] = [];
-const fallbackStoragePath = process.env.PRODUCTS_STORAGE_FILE ?? path.join('/tmp', 'products.json');
-const blobStoragePath = 'data/products.json';
+const fallbackStoragePath = process.env.PRODUCTS_STORAGE_FILE ?? path.join(process.env.APP_STORAGE_DIR || '/app/storage', 'products', 'products.json');
 
 async function ensureFallbackStorageFile() {
   await fs.mkdir(path.dirname(fallbackStoragePath), { recursive: true });
 }
 
 async function readFallbackProducts(): Promise<Product[]> {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    try {
-      const { list } = await import('@vercel/blob');
-      const result = await list({ prefix: blobStoragePath, limit: 1 });
-      const blob = result.blobs.find((item) => item.pathname === blobStoragePath);
-
-      if (!blob) return initialProducts;
-
-      const response = await fetch(blob.url, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`Blob metadata request failed with ${response.status}`);
-
-      const parsed = await response.json();
-      return Array.isArray(parsed) ? parsed : initialProducts;
-    } catch (error) {
-      console.warn('Blob product storage read failed.', error);
-      throw error;
-    }
-  }
-
   try {
-    await ensureFallbackStorageFile();
-    const file = await fs.readFile(fallbackStoragePath, 'utf8');
-    const parsed = JSON.parse(file);
+    const parsed = await readJsonFile('products/products.json', initialProducts);
     return Array.isArray(parsed) ? parsed : initialProducts;
   } catch {
     return initialProducts;
@@ -42,46 +21,26 @@ async function readFallbackProducts(): Promise<Product[]> {
 }
 
 async function writeFallbackProducts(products: Product[]) {
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    const { put } = await import('@vercel/blob');
-    await put(blobStoragePath, JSON.stringify(products, null, 2), {
-      access: 'public',
-      addRandomSuffix: false,
-      contentType: 'application/json'
-    });
-    return;
-  }
-
   await ensureFallbackStorageFile();
+  await writeJsonFile('products/products.json', products);
   await fs.writeFile(fallbackStoragePath, JSON.stringify(products, null, 2), 'utf8');
 }
 
 async function ensureProductsTable() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS products (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      description TEXT NOT NULL,
-      price TEXT NOT NULL,
-      image_url TEXT NOT NULL,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    );
-  `;
-
-  await sql`ALTER TABLE products ALTER COLUMN price TYPE TEXT USING price::text;`;
+  await initDatabase();
 }
 
 async function seedInitialProducts() {
-  const result = await sql`SELECT COUNT(*)::int AS count FROM products;`;
+  const result = await runSql<{ count: string }>('SELECT COUNT(*)::int AS count FROM products;');
   const count = Number(result.rows[0]?.count ?? 0);
 
   if (count > 0) return;
 
   for (const product of initialProducts) {
-    await sql`
-      INSERT INTO products (id, name, description, price, image_url, created_at)
-      VALUES (${product.id}, ${product.name}, ${product.description}, ${product.price}, ${product.imageUrl}, ${product.createdAt});
-    `;
+    await runSql(
+      `INSERT INTO products (id, name, description, price, image_url, created_at) VALUES ($1, $2, $3, $4, $5, $6);`,
+      [product.id, product.name, product.description, product.price, product.imageUrl, product.createdAt]
+    );
   }
 }
 
@@ -90,12 +49,7 @@ export async function getProducts(): Promise<Product[]> {
     await ensureProductsTable();
     await seedInitialProducts();
 
-    const result = await sql`
-      SELECT id, name, description, price, image_url AS "imageUrl", created_at AS "createdAt"
-      FROM products
-      ORDER BY created_at DESC, id DESC
-    `;
-
+    const result = await runSql<Product>(`SELECT id, name, description, price, image_url AS "imageUrl", created_at AS "createdAt" FROM products ORDER BY created_at DESC, id DESC;`);
     return result.rows as Product[];
   } catch (error) {
     console.warn('Falling back to file-based product storage.', error);
@@ -116,10 +70,10 @@ export async function createProduct(input: ProductInput): Promise<Product> {
       createdAt: new Date().toISOString()
     };
 
-    await sql`
-      INSERT INTO products (id, name, description, price, image_url, created_at)
-      VALUES (${product.id}, ${product.name}, ${product.description}, ${product.price}, ${product.imageUrl}, ${product.createdAt});
-    `;
+    await runSql(
+      `INSERT INTO products (id, name, description, price, image_url, created_at) VALUES ($1, $2, $3, $4, $5, $6);`,
+      [product.id, product.name, product.description, product.price, product.imageUrl, product.createdAt]
+    );
 
     return product;
   } catch (error) {
@@ -151,11 +105,10 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
       createdAt: new Date().toISOString()
     };
 
-    await sql`
-      UPDATE products
-      SET name = ${updated.name}, description = ${updated.description}, price = ${updated.price}, image_url = ${updated.imageUrl}
-      WHERE id = ${id};
-    `;
+    await runSql(
+      `UPDATE products SET name = $1, description = $2, price = $3, image_url = $4 WHERE id = $5;`,
+      [updated.name, updated.description, updated.price, updated.imageUrl, id]
+    );
 
     return updated;
   } catch (error) {
@@ -183,9 +136,9 @@ export async function updateProduct(id: string, input: ProductInput): Promise<Pr
 export async function deleteProduct(id: string): Promise<void> {
   try {
     await ensureProductsTable();
-    const result = await sql`DELETE FROM products WHERE id = ${id};`;
+    const result = await runSql('DELETE FROM products WHERE id = $1;', [id]);
 
-    if (result.rowCount === 0) {
+    if ((result.rowCount ?? 0) === 0) {
       const products = await readFallbackProducts();
       const filtered = products.filter((product) => product.id !== id);
       if (filtered.length === products.length) {
@@ -195,7 +148,6 @@ export async function deleteProduct(id: string): Promise<void> {
       return;
     }
 
-    // Keep fallback storage in sync when reads temporarily use it.
     try {
       const products = await readFallbackProducts();
       const filtered = products.filter((product) => product.id !== id);

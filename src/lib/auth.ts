@@ -2,6 +2,18 @@
 
 import { cookies } from 'next/headers';
 
+export async function getAdminCredentials() {
+  return {
+    username: process.env.ADMIN_USERNAME || 'admin',
+    password: process.env.ADMIN_PASSWORD || 'change-me'
+  };
+}
+
+export async function verifyAdminCredentials(username: string, password: string) {
+  const { username: expectedUser, password: expectedPassword } = await getAdminCredentials();
+  return username.trim() === expectedUser && password.trim() === expectedPassword;
+}
+
 export async function setAdminAuthCookie() {
   cookies().set('sticker-admin-auth', 'true', {
     httpOnly: true,

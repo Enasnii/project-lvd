@@ -15,16 +15,24 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
 
-    const validUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin';
-    const validPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'Gurbetabe123';
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
 
-    if (username.trim() !== validUsername || password.trim() !== validPassword) {
-      setError('Onjuiste inloggegevens.');
-      return;
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || 'Onjuiste inloggegevens.');
+        return;
+      }
+
+      await setAdminAuthCookie();
+      router.push('/admin');
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : 'Inloggen mislukt.');
     }
-
-    await setAdminAuthCookie();
-    router.push('/admin');
   }
 
   return (

@@ -4,13 +4,13 @@ Een volledige, productie-klare Next.js-app voor een stickerbedrijf met:
 - een publieke prijslijstpagina
 - een beveiligd admin-dashboard op /admin
 - productbeheer, prijswijzigingen en afbeeldings-URLs
-- een eenvoudige, veilige single-user login-oplossing via environment variables
+- een veilige single-user login-oplossing via server-side environment variables
 
 ## Stack
 - Next.js App Router
 - React + TypeScript
-- Vercel Postgres voor productdata, met Vercel Blob als duurzame fallback
-- Vercel Blob voor afbeeldingen en productdata wanneer Postgres niet beschikbaar is
+- PostgreSQL in Docker
+- lokale bestandsopslag op Ubuntu/Docker volume
 
 ## Lokale ontwikkeling
 1. Installeer dependencies:
@@ -20,29 +20,30 @@ Een volledige, productie-klare Next.js-app voor een stickerbedrijf met:
 3. Open http://localhost:3000
 
 ## Omgevingsvariabelen
-Stel deze variabelen in in Vercel > Project > Settings > Environment Variables:
-- NEXT_PUBLIC_ADMIN_USERNAME
-- NEXT_PUBLIC_ADMIN_PASSWORD
-- BLOB_READ_WRITE_TOKEN
+Gebruik deze variabelen in Docker of lokaal:
 - POSTGRES_URL
+- POSTGRES_DB
+- POSTGRES_USER
+- POSTGRES_PASSWORD
+- ADMIN_USERNAME
+- ADMIN_PASSWORD
+- APP_STORAGE_DIR
 
 Voorbeeldwaarden:
-- NEXT_PUBLIC_ADMIN_USERNAME=admin
-- NEXT_PUBLIC_ADMIN_PASSWORD=sterk-wachtwoord-123
-- BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
-- POSTGRES_URL=postgres://user:password@host:5432/db
+- POSTGRES_URL=postgres://appuser:change-me@db:5432/lvd
+- ADMIN_USERNAME=admin
+- ADMIN_PASSWORD=change-me
+- APP_STORAGE_DIR=/app/storage
 
-## Deployen op Vercel
-1. Upload deze map naar GitHub of GitLab.
-2. Maak een nieuwe Vercel-app aan en verbind de repository.
-3. Stel de environment variables hierboven in.
-4. Zorg dat de Root Directory in Vercel op de hoofdmap van dit project staat.
-5. Deploy.
+## Docker / self-hosting
+1. Zet de variabelen in een `.env`-bestand.
+2. Start de stack met `docker compose up --build`.
+3. De app gebruikt PostgreSQL in Docker en persistent opslag in `/home/insane/lddesign-storage`.
 
 ## Beveiliging
 - Admin-routes zijn beschermd met een auth-cookie.
-- Inloggegevens worden niet hardcoded in de code; ze komen uit environment variables.
-- Server-side inputvalidatie wordt gedaan in de admin-flow.
+- Inloggegevens worden niet naar de browser-bundle gestuurd.
+- Credential-validatie gebeurt server-side.
 
 ## Opmerking
-Productdata wordt eerst opgeslagen in Postgres. Als Postgres tijdelijk niet beschikbaar is, gebruikt de app `data/products.json` in Vercel Blob. Zonder database of Blob-token is de lokale bestandsopslag alleen geschikt voor lokale ontwikkeling; bestanden in `/tmp` zijn op Vercel niet permanent.
+Productdata wordt opgeslagen in PostgreSQL. Pages, portfolio, productaanvragen en uploads worden lokaal in de Docker bind mount opgeslagen, zodat data blijft bestaan bij recreatie van containers.

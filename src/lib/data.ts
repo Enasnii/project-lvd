@@ -5,16 +5,10 @@ import {
   getProducts as getStoredProducts,
   updateProduct as updateStoredProduct
 } from './products-store';
+import { saveUploadedFile } from './local-storage';
 
 export async function uploadImageToBlob(file: File): Promise<string> {
-  const { put } = await import('@vercel/blob');
-
-  const blob = await put(file.name, file, {
-    access: 'public',
-    contentType: file.type
-  });
-
-  return blob.url;
+  return saveUploadedFile(file, 'products');
 }
 
 export async function getProducts(): Promise<Product[]> {

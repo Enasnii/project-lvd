@@ -1,20 +1,14 @@
-import { put } from '@vercel/blob';
 import { NextResponse } from 'next/server';
+import { saveUploadedFile } from '@/lib/local-storage';
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const filename = searchParams.get('filename') || 'upload';
+    const file = new File([await request.arrayBuffer()], filename, { type: 'application/octet-stream' });
 
-    if (!request.body) {
-      return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
-    }
-
-    const blob = await put(filename, request.body, {
-      access: 'public'
-    });
-
-    return NextResponse.json(blob);
+    const url = await saveUploadedFile(file);
+    return NextResponse.json({ url });
   } catch (error) {
     console.error('avatar upload error', error);
     return NextResponse.json(
