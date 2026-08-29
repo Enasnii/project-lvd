@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdminCredentials } from '@/lib/auth';
+import { setAdminAuthCookie, verifyAdminCredentials } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
@@ -9,11 +9,13 @@ export async function POST(request: NextRequest) {
     const username = typeof body?.username === 'string' ? body.username : '';
     const password = typeof body?.password === 'string' ? body.password : '';
 
-    if (!verifyAdminCredentials(username, password)) {
+    if (!(await verifyAdminCredentials(username, password))) {
       return NextResponse.json({ error: 'Onjuiste inloggegevens.' }, { status: 401 });
     }
 
-    return NextResponse.json({ ok: true });
+    const response = NextResponse.json({ ok: true });
+    await setAdminAuthCookie(response);
+    return response;
   } catch {
     return NextResponse.json({ error: 'Inloggen mislukt.' }, { status: 500 });
   }

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { setAdminAuthCookie } from '@/lib/auth';
 import SiteHeader from '../../SiteHeader';
 
 export default function AdminLoginPage() {
@@ -28,7 +27,6 @@ export default function AdminLoginPage() {
         return;
       }
 
-      await setAdminAuthCookie();
       router.push('/admin');
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : 'Inloggen mislukt.');
