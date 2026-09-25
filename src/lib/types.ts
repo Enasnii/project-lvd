@@ -1,17 +1,37 @@
 export type Product = {
   id: string;
   name: string;
+  slug: string;
   description: string;
   price: string;
   imageUrl: string;
+  mainImageUrl: string;
+  category: string;
+  images: ProductImage[];
+  colors: ProductColor[];
+  variants: ProductVariant[];
+  status: ProductStatus;
   createdAt: string;
+  updatedAt: string;
 };
+
+export type ProductImage = { id: string; url: string; alt?: string; order: number };
+export type ProductColor = { id: string; name: string; hex?: string; imageIds?: string[] };
+export type ProductVariant = { id: string; name: string };
+export type ProductStatus = 'published' | 'hidden';
 
 export type ProductInput = {
   name: string;
   description: string;
   price: string;
-  imageUrl: string;
+  imageUrl?: string;
+  slug?: string;
+  category?: string;
+  images?: ProductImage[];
+  colors?: ProductColor[];
+  variants?: ProductVariant[];
+  mainImageUrl?: string;
+  status?: ProductStatus;
 };
 
 export type ProductRequestInput = {

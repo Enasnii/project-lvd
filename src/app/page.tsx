@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Product } from '@/lib/types';
 import SiteHeader from './SiteHeader';
 
@@ -43,14 +44,18 @@ export default function HomePage() {
         <p>Alle productprijzen zijn direct zichtbaar voor klanten.</p>
         <div className="grid grid-3">
           {products.map((product) => (
-            <article key={product.id} className="card">
+            <Link href={`/producten/${product.slug}`} key={product.id} className="card product-card">
               {product.imageUrl ? <div style={{ marginBottom: '0.75rem', overflow: 'hidden', borderRadius: 18, background: '#f3f4f6' }}>
                 <img src={product.imageUrl} alt={product.name} style={{ width: '100%', height: 260, objectFit: 'contain', display: 'block' }} />
               </div> : null}
               <h3>{product.name}</h3>
               <p>{product.description}</p>
+              {product.colors.length ? <div className="product-card-colors" aria-label={`Beschikbare kleuren: ${product.colors.map((color) => color.name).join(', ')}`}>
+                {product.colors.slice(0, 5).map((color) => <i key={color.id} title={color.name} style={{ backgroundColor: color.hex || '#d1d5db' }} />)}
+                {product.colors.length > 5 ? <span>+{product.colors.length - 5}</span> : null}
+              </div> : null}
               <strong>{formatPrice(product.price)}</strong>
-            </article>
+            </Link>
           ))}
         </div>
       </section>

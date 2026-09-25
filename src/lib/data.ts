@@ -11,8 +11,8 @@ export async function uploadImageToBlob(file: File): Promise<string> {
   return saveUploadedFile(file, 'products');
 }
 
-export async function getProducts(): Promise<Product[]> {
-  return getStoredProducts();
+export async function getProducts(includeUnpublished = false): Promise<Product[]> {
+  return getStoredProducts(includeUnpublished);
 }
 
 export async function createProduct(input: ProductInput): Promise<Product> {

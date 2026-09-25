@@ -1,13 +1,4 @@
-CREATE TABLE IF NOT EXISTS products (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  description TEXT NOT NULL,
-  price TEXT NOT NULL,
-  image_url TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE products ALTER COLUMN price TYPE TEXT USING price::text;
+-- Safe, additive product migration. It preserves all existing rows and files.
 ALTER TABLE products ADD COLUMN IF NOT EXISTS slug TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT '';
 ALTER TABLE products ADD COLUMN IF NOT EXISTS images JSONB NOT NULL DEFAULT '[]'::jsonb;

@@ -133,7 +133,10 @@ export default function ProductRequestForm() {
         </div>
 
         <div className="mb-4">
-          <label className="block font-medium mb-1">Afbeelding uploaden (jpg, png, webp) — optioneel</label>
+          <label className="block font-medium mb-1 upload-label">
+            Afbeelding upload
+            <span className="upload-guidance">Bij voorkeur het originele bestand — geen telefoonscreenshots.</span>
+          </label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
